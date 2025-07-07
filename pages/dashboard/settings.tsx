@@ -128,6 +128,10 @@ export default function Settings() {
     );
   }
 
+  function setShowLogoutModal(arg0: boolean): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <>
       <Head>

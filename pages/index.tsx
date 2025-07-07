@@ -289,14 +289,14 @@ function FeatureToggle({ nextSlide, prevSlide }: { nextSlide: () => void; prevSl
         <li>😊 <b>Mood Tagging:</b> Intuitive emoji or slider system for your feelings</li>
         <li>📅 <b>Calendar View:</b> Interactive calendar for mood and entry history tracking</li>
         <li>🌗 <b>Minimalist UI:</b> Light and dark mode options for every mood</li>
-        <li>🔒 <b>Privacy First:</b> Biometric login and optional app lock</li>
         <li>⏰ <b>Smart Reminders:</b> Encourages consistent journaling habits</li>
-        <li>🎤 <b>Voice-to-Text:</b> Hands-free entry creation</li>
         <li>📎 <b>Media Attachments:</b> Add photos, audio, and more to your entries</li>
         <li>📡 <b>Offline Access:</b> Journal anywhere, anytime—no internet needed</li>
         <li>⏳ <b>Time Capsule:</b> Schedule future resurfacing of special entries</li>
-        <li>🔗 <b>Cross-Platform Sync:</b> Seamless access on mobile, web, and desktop</li>
+        <li>🔗 <b>Cross-Platform Sync:</b> Seamless access on web, and desktop</li>
         <li>📊 <b>Mood Analytics:</b> Visualize your emotional patterns over time</li>
+        <li>🌍 <b>Public Journaling:</b> Share select entries with the world to inspire and connect</li>
+        <li>🔒 <b>Private Thoughts:</b> Keep entries just for you—safe, secure, and personal</li>
       </ul>
       <button
         onClick={nextSlide}

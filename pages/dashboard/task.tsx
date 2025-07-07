@@ -8,10 +8,10 @@ import Link from "next/link";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 const STATUS_COLUMNS = [
-  { key: "todo", label: "Todo", color: "bg-[#A09ABC]", card: "bg-[#E1D8E9]" },
-  { key: "inprogress", label: "In Progress", color: "bg-[#B6A6CA]", card: "bg-[#D5CFE1]" },
+  { key: "todo", label: "To Do", color: "bg-[#A09ABC]", card: "bg-[#E1D8E9]" },
+  { key: "inprogress", label: "In Progress", color: "bg-[#B6A6CA]" },
   { key: "review", label: "In Review", color: "bg-[#D5CFE1]", card: "bg-[#B6A6CA]" },
-  { key: "done", label: "Done", color: "bg-[#B6A6CA]", card: "bg-[#A09ABC]" },
+  { key: "done", label: "Done", color: "bg-[#B6A6CA]" },
 ];
 
 export default function TaskPage() {

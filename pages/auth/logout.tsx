@@ -9,10 +9,10 @@ export default function Logout() {
   const router = useRouter();
   const { showContent } = useContext(TransitionContext);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.replace('/welcome');
-  };
+  async function handleLogout() {
+  await supabase.auth.signOut();
+  router.push("/auth/login");
+}
 
   const handleCancel = () => {
     if (window.history.length > 2) {
@@ -70,7 +70,7 @@ export default function Logout() {
             className="py-2 px-8 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-semibold text-lg shadow-lg hover:from-[#B6A6CA] hover:to-[#A09ABC] transition"
             onClick={handleCancel}
           >
-            Naah, Just Kidding
+            Cancel
           </button>
           <button
             className="py-2 px-8 rounded-full border-2 border-[#A09ABC] text-[#A09ABC] font-semibold text-lg bg-white/80 hover:bg-[#E1D8E9] shadow-lg transition"

@@ -36,15 +36,15 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <DarkModeProvider>
-      <TransitionContext.Provider value={{ showContent }}>
-        <Toaster position="top-right" reverseOrder={false} />
-        {/* Global transition overlay */}
-        <div
-          className={`fixed inset-0 z-[100] pointer-events-none transition-opacity duration-500 ${showOverlay ? 'opacity-100' : 'opacity-0'}`}
-          style={{ background: "linear-gradient(120deg, #A09ABC, #B6A6CA, #E1D8E9, #D4BEBE)", backgroundSize: "200% 200%" }}
-        />
-        <Component {...pageProps} />
-      </TransitionContext.Provider>
+    <TransitionContext.Provider value={{ showContent }}>
+      <Toaster position="top-right" reverseOrder={false} />
+      {/* Global transition overlay */}
+      <div
+        className={`fixed inset-0 z-[100] pointer-events-none transition-opacity duration-500 ${showOverlay ? 'opacity-100' : 'opacity-0'}`}
+        style={{ background: "linear-gradient(120deg, #A09ABC, #B6A6CA, #E1D8E9, #D4BEBE)", backgroundSize: "200% 200%" }}
+      />
+      <Component {...pageProps} />
+    </TransitionContext.Provider>
     </DarkModeProvider>
   );
 }

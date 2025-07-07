@@ -32,7 +32,6 @@ export default function Journal() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
-  const { darkMode } = useDarkMode();
 
   const emojiCategories = [
     { name: 'Smileys', emojis: ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🥴','😇','🥳'] },
@@ -159,15 +158,15 @@ export default function Journal() {
     color: '#6C63A6', fontWeight: 500, fontSize: 16
   };
   const switchOuter = {
-    width: 44, height: 24, borderRadius: 12, background: isPublic ? 'linear-gradient(90deg, #A09ABC 0%, #B6A6CA 100%)' : '#e5e7eb', position: 'relative' as const, cursor: 'pointer', transition: 'background 0.3s', display: 'inline-block', verticalAlign: 'middle'
+    width: 44, height: 24, borderRadius: 12, background: isPublic ? 'linear-gradient(90deg, #A09ABC 0%, #B6A6CA 100%)' : '#e5e7eb', position: 'relative' as 'relative', cursor: 'pointer', transition: 'background 0.3s', display: 'inline-block', verticalAlign: 'middle'
   };
   const switchInner = {
-    position: 'absolute' as const, top: 2, left: isPublic ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px #D5CFE1', transition: 'left 0.3s'
+    position: 'absolute' as 'absolute', top: 2, left: isPublic ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px #D5CFE1', transition: 'left 0.3s'
   };
 
   if (loading) {
     return (
-      <div className={`flex min-h-screen items-center justify-center ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
+      <div className="flex min-h-screen bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA] items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#A09ABC]"></div>
       </div>
     );
@@ -179,11 +178,11 @@ export default function Journal() {
         <title>Journal - Reflectly</title>
         <meta name="description" content="Your personal journal entries" />
       </Head>
-      <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
+      <div className="flex min-h-screen bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <main className={`flex-1 p-10 min-h-screen transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
+        <main className={`flex-1 p-10 bg-transparent min-h-screen transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
           <div className="max-w-3xl mx-auto">
-            <h2 className={`text-3xl font-bold mb-6 ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>📔 My Journal</h2>
+            <h2 className="text-3xl font-bold text-[#A09ABC] mb-6">📔 My Journal</h2>
             {/* Add Entry Button */}
             <div className="mb-8 flex justify-end">
               <button
@@ -263,24 +262,43 @@ export default function Journal() {
                 {editingEntry ? 'Save Changes' : 'Save Entry'}
               </button>
             </Modal>
-            {/* Journal Entries List */}
-            <div className={`${darkMode ? 'bg-[#23234a]' : 'bg-white/70'} rounded-xl p-6 shadow border ${darkMode ? 'border-[#23234a]' : 'border-white/30'} backdrop-blur-md`}>
-              {entries.length === 0 ? (
-                <div className={`text-center py-8 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>
-                  No journal entries yet.
-                </div>
-              ) : (
-                <ul className="space-y-4">
-                  {entries.map((entry) => (
-                    <li key={entry.id} className={`${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white/80 text-[#6C63A6]'} rounded-lg p-4 shadow border ${darkMode ? 'border-[#23234a]' : 'border-white/30'}`}>
-                      <div className={`text-sm mb-1 ${darkMode ? 'text-[#B6A6CA]' : 'text-[#A09ABC]'}`}>{new Date(entry.created_at).toLocaleString()}</div>
-                      <div className="font-semibold">{entry.title}</div>
-                      <div>{entry.content}</div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            {entries.length === 0 ? (
+              <div className="text-[#6C63A6] text-center bg-white/60 p-8 rounded-xl backdrop-blur-md border border-white/30">
+                No entries yet. Start writing above! ✍️
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {entries.map((entry, idx) => (
+                  <div key={entry.id} className="bg-white/70 rounded-xl p-6 shadow border border-white/30 backdrop-blur-md relative">
+                    <div className="flex justify-between items-center mb-3">
+                      <div style={{ fontWeight: 700, fontSize: 20, color: '#7c3aed' }}>
+                        {entry.title && entry.title.trim() !== '' ? entry.title : `Entry #${entries.length - idx}`}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>{new Date(entry.created_at).toLocaleString()}</span>
+                        {entry.public && <span className="bg-[#A09ABC] text-white px-2 py-1 rounded-full text-xs">🌍 Public</span>}
+                        {!entry.public && <span className="bg-gray-300 text-[#6C63A6] px-2 py-1 rounded-full text-xs">🔒 Private</span>}
+                        <button
+                          onClick={() => openEditEntryModal(entry)}
+                          className="text-blue-500 hover:text-blue-700 transition-colors ml-2"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => deleteEntry(entry.id)}
+                          className="text-red-500 hover:text-red-700 transition-colors"
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-[#6C63A6] whitespace-pre-wrap leading-relaxed">
+                      {entry.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </main>
       </div>

@@ -16,6 +16,7 @@ import {
   Bar,
   Legend,
   Area,
+  AreaChart,
 } from "recharts";
 
 export default function Analytics() {
@@ -100,49 +101,49 @@ export default function Analytics() {
                   <div className={`text-center py-8 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>No data yet. Start tracking your moods and journals! 📈</div>
                 ) : (
                   <ResponsiveContainer width="100%" height={320}>
-                    <ComposedChart data={combinedData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                    <AreaChart data={combinedData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                       <defs>
-                        <linearGradient id="moodPurple" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#6C3483" stopOpacity={0.8} />
-                          <stop offset="100%" stopColor="#2E0854" stopOpacity={0.2} />
+                        <linearGradient id="lightPurple" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#B6A6CA" stopOpacity={0.7} />
+                          <stop offset="100%" stopColor="#E1D8E9" stopOpacity={0.2} />
                         </linearGradient>
-                        <linearGradient id="journalPink" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#ff6ec4" stopOpacity={0.8} />
-                          <stop offset="100%" stopColor="#b83280" stopOpacity={0.2} />
+                        <linearGradient id="darkPurple" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#6C3483" stopOpacity={0.8} />
+                          <stop offset="100%" stopColor="#23234a" stopOpacity={0.2} />
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="date" stroke="#A09ABC" />
-                      <YAxis stroke="#A09ABC" allowDecimals={false} />
+                      <XAxis dataKey="date" stroke="#A09ABC" tick={{ fontSize: 14 }} />
+                      <YAxis stroke="#A09ABC" allowDecimals={false} tick={{ fontSize: 14 }} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: darkMode ? '#23234a' : 'rgba(255, 255, 255, 0.9)',
-                          border: `1px solid ${darkMode ? '#A09ABC' : 'rgba(160, 154, 188, 0.3)'}`,
+                          backgroundColor: 'rgba(255,255,255,0.95)',
+                          border: '1px solid #B6A6CA',
                           borderRadius: '8px',
-                          color: darkMode ? '#A09ABC' : '#6C63A6'
+                          color: '#6C63A6',
+                          fontWeight: 600
                         }}
-                        formatter={(value, name) => [typeof value === 'number' ? Math.round(value) : value, name]}
+                        formatter={(value) => (typeof value === 'number' ? Math.round(value) : value)}
                       />
                       <Legend verticalAlign="top" height={36} iconType="circle" />
                       <Area
                         type="monotone"
                         dataKey="moods"
-                        name="Mood Logs"
+                        stroke="#B6A6CA"
+                        fill="url(#lightPurple)"
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: '#B6A6CA' }}
+                        activeDot={{ r: 7, fill: '#B6A6CA' }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="entries"
                         stroke="#6C3483"
-                        fill="url(#moodPurple)"
+                        fill="url(#darkPurple)"
                         strokeWidth={3}
                         dot={{ r: 4, fill: '#6C3483' }}
                         activeDot={{ r: 7, fill: '#6C3483' }}
                       />
-                      <Line
-                        type="monotone"
-                        dataKey="entries"
-                        name="Journal Entries"
-                        stroke="#ff6ec4"
-                        strokeWidth={3}
-                        dot={{ r: 5, fill: '#ff6ec4' }}
-                        activeDot={{ r: 8, fill: '#b83280' }}
-                      />
-                    </ComposedChart>
+                    </AreaChart>
                   </ResponsiveContainer>
                 )}
               </div>

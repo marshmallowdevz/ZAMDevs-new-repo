@@ -150,42 +150,6 @@ export default function MoodTracker() {
                 </div>
               </div>
             </div>
-
-            <div className={`${darkMode ? 'bg-[#23234a]' : 'bg-white/70'} rounded-xl p-6 shadow border ${darkMode ? 'border-[#23234a]' : 'border-white/30'} backdrop-blur-md`}>
-              <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>Mood Trends</h3>
-              {moodData.length === 0 ? (
-                <div className={`text-center py-8 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>
-                  No mood data yet. Start tracking your moods above! 📊
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={moodData.reduce((acc, mood) => {
-                      const date = new Date(mood.created_at).toLocaleDateString();
-                      const found = acc.find((d) => d.date === date);
-                      if (found) {
-                        found.moods += 1;
-                      } else {
-                        acc.push({ date, moods: 1 });
-                      }
-                      return acc;
-                    }, [] as { date: string; moods: number }[])}
-                  >
-                    <XAxis dataKey="date" stroke="#A09ABC" />
-                    <YAxis stroke="#A09ABC" />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: darkMode ? '#23234a' : 'rgba(255, 255, 255, 0.9)',
-                        border: `1px solid ${darkMode ? '#A09ABC' : 'rgba(160, 154, 188, 0.3)'}`,
-                        borderRadius: '8px',
-                        color: darkMode ? '#A09ABC' : '#6C63A6'
-                      }}
-                    />
-                    <Bar dataKey="moods" fill="#A09ABC" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
           </div>
         </main>
       </div>

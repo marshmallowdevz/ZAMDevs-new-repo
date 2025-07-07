@@ -5,6 +5,7 @@ import { useDarkMode } from "../../components/DarkModeContext";
 import { FaCog, FaPlus, FaUserCircle } from "react-icons/fa";
 import Head from "next/head";
 import Link from "next/link";
+import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DroppableProvided } from "@hello-pangea/dnd";
 
 const STATUS_COLUMNS = [
   { key: "todo", label: "Todo", color: "bg-[#A09ABC]" },
@@ -19,6 +20,7 @@ export default function TaskPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [newTask, setNewTask] = useState("");
   const [newStatus, setNewStatus] = useState("todo");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchTasks();
@@ -65,6 +67,27 @@ export default function TaskPage() {
     setTasks(tasks.filter(task => task.id !== id));
   }
 
+  // Drag and drop handler
+  const onDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+    const sourceCol = result.source.droppableId;
+    const destCol = result.destination.droppableId;
+    if (sourceCol !== destCol) {
+      const taskId = result.draggableId;
+      // Optimistically update UI
+      const prevTasks = [...tasks];
+      setTasks(tasks.map(task =>
+        String(task.id) === taskId ? { ...task, status: destCol } : task
+      ));
+      // Update backend
+      const { error: updateError } = await supabase.from("tasks").update({ status: destCol }).eq("id", taskId);
+      if (updateError) {
+        setError("Failed to update task status: " + updateError.message);
+        setTasks(prevTasks); // revert UI
+      }
+    }
+  };
+
   return (
     <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
       <Head>
@@ -106,48 +129,59 @@ export default function TaskPage() {
           </button>
         </div>
         {/* Kanban Board */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {STATUS_COLUMNS.map(col => (
-            <div key={col.key} className={`rounded-2xl p-4 shadow-xl ${darkMode ? 'bg-[#23234a]' : col.color} min-h-[300px]`}>
-              <div className={`flex items-center gap-2 mb-4 text-lg font-bold ${darkMode ? 'text-[#A09ABC]' : 'text-white'}`}>{col.label}</div>
-              <div className="space-y-4">
-                {tasks.filter(task => (task.status || "todo") === col.key).length === 0 && (
-                  <div className={`text-center italic ${darkMode ? 'text-[#A09ABC]' : 'text-white/80'}`}>No tasks</div>
-                )}
-                {tasks.filter(task => (task.status || "todo") === col.key).map(task => (
-                  <div key={task.id} className={`rounded-xl p-4 shadow border ${darkMode ? 'bg-[#1a1a2e] border-[#23234a] text-[#A09ABC]' : 'bg-white/80 border-white/30 text-[#6C63A6]'} flex flex-col gap-2`}>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={task.completed}
-                        onChange={() => toggleTask(task.id, task.completed)}
-                        className="h-5 w-5 text-[#A09ABC]"
-                      />
-                      <span className={`font-semibold ${task.completed ? 'line-through opacity-60' : ''}`}>{task.description}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <FaUserCircle className="text-xl" />
-                      <span className="text-xs">You</span>
-                      <span className={`ml-auto text-xs px-2 py-1 rounded-full ${col.key === 'done' ? 'bg-green-400/30 text-green-700' : col.key === 'review' ? 'bg-yellow-200/30 text-yellow-700' : col.key === 'inprogress' ? 'bg-blue-200/30 text-blue-700' : 'bg-[#A09ABC]/20 text-[#A09ABC]'}`}>{col.label}</span>
-                    </div>
-                    <div className="flex gap-2 mt-2">
-                      {STATUS_COLUMNS.filter(s => s.key !== col.key).map(s => (
-                        <button
-                          key={s.key}
-                          onClick={() => updateTaskStatus(task.id, s.key)}
-                          className={`text-xs px-2 py-1 rounded-full border ${darkMode ? 'border-[#A09ABC] text-[#A09ABC]' : 'border-[#A09ABC] text-[#6C63A6]'} hover:bg-[#A09ABC]/10 transition`}
-                        >
-                          Move to {s.label}
-                        </button>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {STATUS_COLUMNS.map(col => (
+              <Droppable key={col.key} droppableId={col.key}>
+                {(provided: DroppableProvided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`rounded-2xl p-4 shadow-xl ${darkMode ? 'bg-[#23234a]' : col.color} min-h-[300px]`}
+                  >
+                    <div className={`flex items-center gap-2 mb-4 text-lg font-bold ${darkMode ? 'text-[#A09ABC]' : 'text-white'}`}>{col.label}</div>
+                    <div className="space-y-4">
+                      {tasks.filter(task => (task.status || "todo") === col.key).length === 0 && (
+                        <div className={`text-center italic ${darkMode ? 'text-[#A09ABC]' : 'text-white/80'}`}>No tasks</div>
+                      )}
+                      {tasks.filter(task => (task.status || "todo") === col.key).map((task, index) => (
+                        <Draggable key={task.id} draggableId={String(task.id)} index={index}>
+                          {(provided: DraggableProvided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`rounded-xl p-4 shadow border ${darkMode ? 'bg-[#1a1a2e] border-[#23234a] text-[#A09ABC]' : 'bg-white/80 border-white/30 text-[#6C63A6]'} flex flex-col gap-2`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={task.completed}
+                                  onChange={() => toggleTask(task.id, task.completed)}
+                                  className="h-5 w-5 text-[#A09ABC]"
+                                />
+                                <span className={`font-semibold ${task.completed ? 'line-through opacity-60' : ''}`}>{task.description}</span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-2">
+                                <FaUserCircle className="text-xl" />
+                                <span className="text-xs">You</span>
+                                <span className={`ml-auto text-xs px-2 py-1 rounded-full ${col.key === 'done' ? 'bg-green-400/30 text-green-700' : col.key === 'review' ? 'bg-yellow-200/30 text-yellow-700' : col.key === 'inprogress' ? 'bg-blue-200/30 text-blue-700' : 'bg-[#A09ABC]/20 text-[#A09ABC]'}`}>{col.label}</span>
+                              </div>
+                              <div className="flex gap-2 mt-2">
+                                <button onClick={() => deleteTask(task.id)} className="ml-auto text-red-500 hover:underline text-xs">🗑️</button>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
                       ))}
-                      <button onClick={() => deleteTask(task.id)} className="ml-auto text-red-500 hover:underline text-xs">🗑️</button>
+                      {provided.placeholder}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+                )}
+              </Droppable>
+            ))}
+          </div>
+        </DragDropContext>
       </main>
     </div>
   );

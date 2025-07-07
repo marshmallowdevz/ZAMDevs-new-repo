@@ -92,9 +92,9 @@ export default function Settings() {
   const [changePwError, setChangePwError] = useState<string | null>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
-  const [showTerms, setShowTerms] = useState(false);
-  const [showPrivacy, setShowPrivacy] = useState(false);
-  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [showRateModal, setShowRateModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [rated, setRated] = useState(false);
 
   const router = useRouter();
 
@@ -295,9 +295,9 @@ export default function Settings() {
                   </button>
                 </li>
                 <li className="flex items-center gap-4 py-3 border-b border-[#E1D8E9] text-[#6C63A6] cursor-pointer hover:bg-[#f0edf6] rounded transition-all"
-                  onClick={() => window.open('https://play.google.com/store/apps/details?id=com.example.app', '_blank') }>
+                  onClick={() => setShowRateModal(true)}>
                   <FaStar className="text-lg" />
-                  <span className="font-medium">Rate App</span>
+                  <span className="font-medium">Rate the Website</span>
                 </li>
                 <li className="flex items-center gap-4 py-3 border-b border-[#E1D8E9] text-[#6C63A6] cursor-pointer hover:bg-[#f0edf6] rounded transition-all"
                   onClick={() => {
@@ -337,31 +337,15 @@ export default function Settings() {
               </ul>
             </div>
             <div className="px-6 pb-8 pt-2 space-y-3">
-              <div className="flex flex-col gap-2 mt-4">
-                <div className="flex items-center gap-1 text-xs text-[#6C63A6] font-light">
-                  <input
-                    type="checkbox"
-                    id="terms"
-                    className="accent-[#A09ABC]"
-                    checked={agreedTerms}
-                    onChange={e => setAgreedTerms(e.target.checked)}
-                  />
-                  <label htmlFor="terms">
-                    I&apos;ve read and agree with <button type="button" className="underline text-[#6C63A6] hover:text-[#A09ABC]" style={{background:'none',border:'none',padding:0,cursor:'pointer'}} onClick={() => setShowTerms(true)}>Terms of Service</button> and our <button type="button" className="underline text-[#6C63A6] hover:text-[#A09ABC]" style={{background:'none',border:'none',padding:0,cursor:'pointer'}} onClick={() => setShowPrivacy(true)}>Privacy Policy</button>
-                  </label>
-                </div>
-              </div>
               <button
                 onClick={() => setChangePw(true)}
                 className={`w-full px-6 py-3 rounded-full ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white text-[#6C63A6]'} font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20`}
-                disabled={!agreedTerms}
               >
                 🔒 Change Password
               </button>
               <button
                 onClick={() => setShowLogoutConfirm(true)}
                 className="w-full px-6 py-3 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 flex items-center justify-center gap-2"
-                disabled={!agreedTerms}
               >
                 <FaSignOutAlt /> Log Out
               </button>
@@ -369,12 +353,34 @@ export default function Settings() {
           </div>
         </main>
       </div>
-      <LegalModal open={showTerms} onClose={() => setShowTerms(false)} title="Terms of Service">
-        <Terms />
-      </LegalModal>
-      <LegalModal open={showPrivacy} onClose={() => setShowPrivacy(false)} title="Privacy Policy">
-        <PrivacyPolicy />
-      </LegalModal>
+      <Modal open={showRateModal} onClose={() => { setShowRateModal(false); setRating(0); setRated(false); }} title="Rate the Website">
+        {!rated ? (
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex gap-1 text-3xl">
+              {[1,2,3,4,5].map(star => (
+                <span
+                  key={star}
+                  style={{ cursor: 'pointer', color: star <= rating ? '#FFD700' : '#A09ABC' }}
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setRating(star)}
+                  onMouseLeave={() => setRating(rating)}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+            <button
+              className="px-4 py-2 rounded bg-[#A09ABC] text-white font-semibold mt-2"
+              disabled={rating === 0}
+              onClick={() => setRated(true)}
+            >
+              Submit
+            </button>
+          </div>
+        ) : (
+          <div className="text-center text-[#6C63A6] font-semibold">Thank you for rating our website!</div>
+        )}
+      </Modal>
     </>
   );
 }

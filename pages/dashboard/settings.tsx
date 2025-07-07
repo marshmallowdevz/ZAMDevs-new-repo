@@ -287,8 +287,13 @@ export default function Settings() {
             </div>
             <div className="px-6 pb-8 pt-2 space-y-3">
               <button
+<<<<<<< Updated upstream
                 onClick={() => setChangePw(true)}
                 className={`w-full px-6 py-3 rounded-full ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white text-[#6C63A6]'} font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20`}
+=======
+                onClick={() => setShowLogoutModal(true)}
+                className="w-full px-6 py-3 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300"
+>>>>>>> Stashed changes
               >
                 🔒 Change Password
               </button>

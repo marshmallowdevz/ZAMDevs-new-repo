@@ -5,7 +5,11 @@ import Sidebar from "../../components/Sidebar";
 import { supabase } from "../../lib/supabaseClient";
 import MoodCalendar from "../../components/MoodCalendar";
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import { useDarkMode } from "../../components/DarkModeContext";
+=======
+import { useRouter } from "next/router";
+>>>>>>> Stashed changes
 =======
 import { useRouter } from "next/router";
 >>>>>>> Stashed changes
@@ -17,8 +21,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const { darkMode } = useDarkMode();
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
@@ -95,6 +102,7 @@ export default function Dashboard() {
   }, [streak]);
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   // Placeholder data for demo
   const today = new Date();
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
@@ -104,6 +112,8 @@ export default function Dashboard() {
   }));
 
 =======
+=======
+>>>>>>> Stashed changes
   // Button Actions
   const handleUpdateMood = () => {
     router.push("/dashboard/mood-tracker");
@@ -116,6 +126,9 @@ export default function Dashboard() {
   const handleNewEntry = () => {
     router.push("/dashboard/journal");
   };
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   if (loading) {
     return (
@@ -136,6 +149,7 @@ export default function Dashboard() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
@@ -206,6 +220,10 @@ export default function Dashboard() {
 =======
       <div className="flex min-h-screen bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+=======
+      <div className="flex min-h-screen bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]">
+        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+>>>>>>> Stashed changes
 
         <main
           className={`flex-1 p-10 bg-transparent min-h-screen transition-all duration-300 ${

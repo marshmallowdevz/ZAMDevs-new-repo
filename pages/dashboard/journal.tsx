@@ -32,6 +32,7 @@ export default function Journal() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
+  const { darkMode } = useDarkMode();
 
   const emojiCategories = [
     { name: 'Smileys', emojis: ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🥴','😇','🥳'] },
@@ -39,7 +40,7 @@ export default function Journal() {
     { name: 'Food', emojis: ['🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶️','🫑','🌽','🥕','🫒','🧄','🧅','🥔','🍠','🥐','🥯','🍞','🥖','🥨','🥞','🧇','🧀','🍖','🍗','🥩','🥓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🫔','🥙','🧆','🥚','🍳','🥘','🍲','🫕','🥣','🥗','🍿','🧈','🧂','🥫','🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🥡','🦪','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','🥛','☕','🫖','🍵','🍶','🍾','🍷','🍸','🍹','🍺','🍻','🥂','🥃','🫗','🥤','🧋','🧃','🧉','🧊','🥢','🍽️','🍴','🥄'] },
     { name: 'Activities', emojis: ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🥅','🏒','🏑','🏏','🥍','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛷','⛸️','🥌','🛼','🛶','⛵','🚤','🛥️','🛳️','⛴️','🚢','✈️','🛩️','🛫','🛬','🪂','💺','🚁','🚟','🚠','🚡','🛰️','🚀','🛸','🛎️','🧳','⌛','⏳','⌚','⏰','⏱️','⏲️','🕰️','🌡️','🗺️','🧭','🎃','🎄','🎆','🎇','🧨','✨','🎈','🎉','🎊','🎋','🎍','🎎','🎏','🎐','🎑','🧧','🎀','🎁','🎗️','🎟️','🎫','🎖️','🏆','🏅','🥇','🥈','🥉','⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🥅','🏒','🏑','🏏','🥍','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛷','⛸️','🥌','🛼'] },
     { name: 'Objects', emojis: ['⌚','📱','📲','💻','⌨️','🖥️','🖨️','🖱️','🖲️','🕹️','🗜️','💽','💾','💿','📀','📼','📷','📸','📹','🎥','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','⏱️','⏲️','⏰','🕰️','⌛','⏳','📡','🔋','🔌','💡','🔦','🕯️','🧯','🛢️','💸','💵','💴','💶','💷','💰','💳','🧾','💎','⚖️','🔧','🔨','⚒️','🛠️','⛏️','🔩','⚙️','🗜️','⚗️','🧪','🧫','🧬','🔬','🔭','📡','💉','🩸','💊','🩹','🩺','🚪','🛏️','🛋️','🪑','🚽','🚿','🛁','🪒','🧴','🧷','🧹','🧺','🧻','🧼','🪣','🧽','🧯','🛒','🚬','⚰️','🪦','⚱️','🏺','🕳️','🏔️','⛰️','🌋','🗻','🏕️','🏖️','🏜️','🏝️','🏞️','🏟️','🏛️','🏗️','🧱','🏘️','🏚️','🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏨','🏩','🏪','🏫','🏬','🏭','🏯','🏰','💒','🗼','🗽','⛪','🕌','🛕','🕍','⛩️','🕋','⛲','⛺','🌁','🌃','🏙️','🌄','🌅','🌆','🌇','🌉','♨️','🎠','🎡','🎢','💈','🎪','🛤️','🚂','🚃','🚄','🚅','🚆','🚇','🚈','🚉','🚊','🚋','🚌','🚍','🚎','🚐','🚑','🚒','🚓','🚔','🚕','🚖','🚗','🚘','🚙','🚚','🚛','🚜','🏎️','🏍️','🛵','🦽','🦼','🛺','🚲','🛴','🛹','🛼','🚏','🛣️','🛤️','🛢️','⛽','🚨','🚥','🚦','🛑','🚧','⚓','⛵','🛶','🚤','🛥️','🛳️','⛴️','🚢','✈️','🛩️','🛫','🛬','🪂','💺','🚁','🚟','🚠','🚡','🛰️','🚀','🛸'] },
-    { name: 'Symbols', emojis: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮','🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅺','🆘','❌','⭕','🛑','⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚳','🔞','📵','🚭','❗','❓','❕','❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🈂️','🛂','🛃','🛄','🛅','🚹','🚺','🚼','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆖','🆗','🆙','🆒','🆓','🆕','🆚','🈁','🈂️'] }
+    { name: 'Symbols', emojis: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮','🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅺','🆘','❌','⭕','🛑','⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','��','🔞','📵','🚭','❗','❓','❕','❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🈂️','🛂','🛃','🛄','🛅','🚹','🚺','🚼','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆖','🆗','🆙','🆒','🆓','🆕','🆚','🈁','🈂️'] }
   ];
   const [activeEmojiCategory, setActiveEmojiCategory] = useState(emojiCategories[0].name);
 
@@ -166,7 +167,7 @@ export default function Journal() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA] items-center justify-center">
+      <div className={`flex min-h-screen items-center justify-center ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#A09ABC]"></div>
       </div>
     );
@@ -178,11 +179,11 @@ export default function Journal() {
         <title>Journal - Reflectly</title>
         <meta name="description" content="Your personal journal entries" />
       </Head>
-      <div className="flex min-h-screen bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]">
+      <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <main className={`flex-1 p-10 bg-transparent min-h-screen transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
+        <main className={`flex-1 p-10 min-h-screen transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-[#A09ABC] mb-6">📔 My Journal</h2>
+            <h2 className={`text-3xl font-bold mb-6 ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>📔 My Journal</h2>
             {/* Add Entry Button */}
             <div className="mb-8 flex justify-end">
               <button
@@ -199,14 +200,14 @@ export default function Journal() {
                 placeholder="Entry Title"
                 value={entryTitle}
                 onChange={e => setEntryTitle(e.target.value)}
-                style={{ width: '100%', borderRadius: 8, padding: 12, border: '1px solid #D5CFE1', color: '#6C63A6', marginBottom: 12, fontSize: 16, background: '#f8f6fa' }}
+                style={{ width: '100%', borderRadius: 8, padding: 12, border: '1px solid #D5CFE1', color: darkMode ? '#A09ABC' : '#6C63A6', marginBottom: 12, fontSize: 16, background: darkMode ? '#23234a' : '#f8f6fa' }}
               />
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
                 <input
                   type="date"
                   value={entryDate}
                   onChange={e => setEntryDate(e.target.value)}
-                  style={{ borderRadius: 6, border: '1px solid #D5CFE1', padding: '8px 12px', color: '#6C63A6', background: '#f8f6fa', fontSize: 15 }}
+                  style={{ borderRadius: 6, border: '1px solid #D5CFE1', padding: '8px 12px', color: darkMode ? '#A09ABC' : '#6C63A6', background: darkMode ? '#23234a' : '#f8f6fa', fontSize: 15 }}
                 />
                 <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
                   {moodOptions.map(mood => (
@@ -223,19 +224,19 @@ export default function Journal() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                 <button style={{ background: '#A09ABC', color: '#fff', border: 'none', borderRadius: 6, padding: 8, fontWeight: 600, fontSize: 18, cursor: 'pointer' }}>A</button>
                 <button
-                  style={{ background: '#f8f6fa', color: '#A09ABC', border: 'none', borderRadius: 6, padding: 8, fontSize: 18, cursor: 'pointer' }}
+                  style={{ background: darkMode ? '#23234a' : '#f8f6fa', color: '#A09ABC', border: 'none', borderRadius: 6, padding: 8, fontSize: 18, cursor: 'pointer' }}
                   onClick={() => setEmojiModalOpen(true)}
                   type="button"
                 >😊</button>
-                <button style={{ background: '#f8f6fa', color: '#A09ABC', border: 'none', borderRadius: 6, padding: 8, fontSize: 18, cursor: 'pointer' }}>📝</button>
+                <button style={{ background: darkMode ? '#23234a' : '#f8f6fa', color: '#A09ABC', border: 'none', borderRadius: 6, padding: 8, fontSize: 18, cursor: 'pointer' }}>📝</button>
                 <button
-                  style={{ background: '#f8f6fa', color: '#A09ABC', border: 'none', borderRadius: 6, padding: 8, fontSize: 18, cursor: undoStack.length === 0 ? 'not-allowed' : 'pointer', opacity: undoStack.length === 0 ? 0.5 : 1 }}
+                  style={{ background: darkMode ? '#23234a' : '#f8f6fa', color: '#A09ABC', border: 'none', borderRadius: 6, padding: 8, fontSize: 18, cursor: undoStack.length === 0 ? 'not-allowed' : 'pointer', opacity: undoStack.length === 0 ? 0.5 : 1 }}
                   onClick={handleUndo}
                   type="button"
                   disabled={undoStack.length === 0}
                 >↺</button>
                 <button
-                  style={{ background: '#f8f6fa', color: '#A09ABC', border: 'none', borderRadius: 6, padding: 8, fontSize: 18, cursor: redoStack.length === 0 ? 'not-allowed' : 'pointer', opacity: redoStack.length === 0 ? 0.5 : 1 }}
+                  style={{ background: darkMode ? '#23234a' : '#f8f6fa', color: '#A09ABC', border: 'none', borderRadius: 6, padding: 8, fontSize: 18, cursor: redoStack.length === 0 ? 'not-allowed' : 'pointer', opacity: redoStack.length === 0 ? 0.5 : 1 }}
                   onClick={handleRedo}
                   type="button"
                   disabled={redoStack.length === 0}
@@ -247,11 +248,11 @@ export default function Journal() {
                 onChange={handleEntryChange}
                 placeholder="Write your thoughts here..."
                 rows={5}
-                style={{ width: '100%', borderRadius: 8, padding: 12, border: '1px solid #D5CFE1', color: '#6C63A6', marginBottom: 16, resize: 'none', fontSize: 16, background: '#f8f6fa' }}
+                style={{ width: '100%', borderRadius: 8, padding: 12, border: '1px solid #D5CFE1', color: darkMode ? '#A09ABC' : '#6C63A6', marginBottom: 16, resize: 'none', fontSize: 16, background: darkMode ? '#23234a' : '#f8f6fa' }}
               />
               <div style={switchContainer}>
-                <span style={switchLabel}>{isPublic ? '🌍 Public' : '🔒 Private'}</span>
-                <div style={switchOuter} onClick={() => setIsPublic(v => !v)}>
+                <span style={{ ...switchLabel, color: darkMode ? '#A09ABC' : '#6C63A6' }}>{isPublic ? '🌍 Public' : '🔒 Private'}</span>
+                <div style={{ ...switchOuter, background: isPublic ? 'linear-gradient(90deg, #A09ABC 0%, #B6A6CA 100%)' : (darkMode ? '#23234a' : '#e5e7eb') }} onClick={() => setIsPublic(v => !v)}>
                   <div style={switchInner}></div>
                 </div>
               </div>
@@ -263,15 +264,15 @@ export default function Journal() {
               </button>
             </Modal>
             {entries.length === 0 ? (
-              <div className="text-[#6C63A6] text-center bg-white/60 p-8 rounded-xl backdrop-blur-md border border-white/30">
+              <div className={`${darkMode ? 'text-[#A09ABC] bg-[#23234a]' : 'text-[#6C63A6] bg-white/60'} text-center p-8 rounded-xl backdrop-blur-md border ${darkMode ? 'border-[#23234a]' : 'border-white/30'}`}>
                 No entries yet. Start writing above! ✍️
               </div>
             ) : (
               <div className="space-y-4">
                 {entries.map((entry, idx) => (
-                  <div key={entry.id} className="bg-white/70 rounded-xl p-6 shadow border border-white/30 backdrop-blur-md relative">
+                  <div key={entry.id} className={`${darkMode ? 'bg-[#23234a] text-[#A09ABC] border-[#23234a]' : 'bg-white/70 text-[#6C63A6] border-white/30'} rounded-xl p-6 shadow border backdrop-blur-md relative`}>
                     <div className="flex justify-between items-center mb-3">
-                      <div style={{ fontWeight: 700, fontSize: 20, color: '#7c3aed' }}>
+                      <div style={{ fontWeight: 700, fontSize: 20, color: darkMode ? '#A09ABC' : '#7c3aed' }}>
                         {entry.title && entry.title.trim() !== '' ? entry.title : `Entry #${entries.length - idx}`}
                       </div>
                       <div className="flex items-center gap-2">
@@ -292,7 +293,7 @@ export default function Journal() {
                         </button>
                       </div>
                     </div>
-                    <div className="text-[#6C63A6] whitespace-pre-wrap leading-relaxed">
+                    <div className="whitespace-pre-wrap leading-relaxed">
                       {entry.content}
                     </div>
                   </div>
@@ -303,14 +304,14 @@ export default function Journal() {
         </main>
       </div>
       {/* Emoji Picker Modal rendered as a sibling, not a child of the main modal */}
-      <Modal isOpen={emojiModalOpen} onClose={() => setEmojiModalOpen(false)} title="Pick an Emoji" style={{ minWidth: 400, maxWidth: 500 }} noBlur={true}>
+      <Modal isOpen={emojiModalOpen} onClose={() => setEmojiModalOpen(false)} title="Pick an Emoji" style={{ minWidth: 400, maxWidth: 500, background: darkMode ? '#23234a' : undefined }} noBlur={true}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
           {emojiCategories.map(cat => (
             <button
               key={cat.name}
               onClick={() => setActiveEmojiCategory(cat.name)}
               style={{
-                background: activeEmojiCategory === cat.name ? '#A09ABC' : '#f8f6fa',
+                background: activeEmojiCategory === cat.name ? '#A09ABC' : (darkMode ? '#23234a' : '#f8f6fa'),
                 color: activeEmojiCategory === cat.name ? '#fff' : '#A09ABC',
                 border: 'none',
                 borderRadius: 6,

@@ -5,13 +5,13 @@ import { useDarkMode } from "../../components/DarkModeContext";
 import { FaCog, FaPlus, FaUserCircle } from "react-icons/fa";
 import Head from "next/head";
 import Link from "next/link";
-import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DroppableProvided } from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 const STATUS_COLUMNS = [
-  { key: "todo", label: "Todo", color: "bg-[#A09ABC]" },
-  { key: "inprogress", label: "In Progress", color: "bg-[#B6A6CA]" },
-  { key: "review", label: "In Review", color: "bg-[#D5CFE1]" },
-  { key: "done", label: "Done", color: "bg-[#B6A6CA]" },
+  { key: "todo", label: "Todo", color: "bg-[#A09ABC]", card: "bg-[#E1D8E9]" },
+  { key: "inprogress", label: "In Progress", color: "bg-[#B6A6CA]", card: "bg-[#D5CFE1]" },
+  { key: "review", label: "In Review", color: "bg-[#D5CFE1]", card: "bg-[#B6A6CA]" },
+  { key: "done", label: "Done", color: "bg-[#B6A6CA]", card: "bg-[#A09ABC]" },
 ];
 
 export default function TaskPage() {
@@ -20,50 +20,87 @@ export default function TaskPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [newTask, setNewTask] = useState("");
   const [newStatus, setNewStatus] = useState("todo");
-  const [error, setError] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [statusWarning, setStatusWarning] = useState(false);
 
   useEffect(() => {
     fetchTasks();
   }, []);
 
   async function fetchTasks() {
+    setError(null);
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error || !session?.user) return;
-    const { data } = await supabase
+    const { data, error: fetchError } = await supabase
       .from("tasks")
       .select("*")
       .eq("user_id", session.user.id)
       .order("created_at", { ascending: false });
+    if (fetchError) {
+      setError("Failed to fetch tasks: " + fetchError.message);
+      return;
+    }
     setTasks(data || []);
+    // Check if status column exists
+    if (data && data.length > 0 && data[0].status === undefined) {
+      setStatusWarning(true);
+    } else {
+      setStatusWarning(false);
+    }
   }
 
   async function addTask() {
+    setError(null);
     if (!newTask.trim()) return;
+    setAdding(true);
     const { data: { session }, error } = await supabase.auth.getSession();
-    if (error || !session?.user) return;
-    const { data } = await supabase
+    if (error || !session?.user) {
+      setError("Not authenticated");
+      setAdding(false);
+      return;
+    }
+    const { data, error: insertError } = await supabase
       .from("tasks")
       .insert([{ description: newTask, completed: false, user_id: session.user.id, status: newStatus }])
       .select();
+    if (insertError) {
+      setError("Failed to add task: " + insertError.message);
+      setAdding(false);
+      return;
+    }
     if (data) {
       setTasks([data[0], ...tasks]);
       setNewTask("");
       setNewStatus("todo");
     }
+    setAdding(false);
   }
 
   async function updateTaskStatus(id: string, status: string) {
-    await supabase.from("tasks").update({ status }).eq("id", id);
+    setError(null);
+    const { error: updateError } = await supabase.from("tasks").update({ status }).eq("id", id);
+    if (updateError) {
+      setError("Failed to update task status: " + updateError.message);
+    }
     fetchTasks();
   }
 
   async function toggleTask(id: string, completed: boolean) {
-    await supabase.from("tasks").update({ completed: !completed }).eq("id", id);
+    setError(null);
+    const { error: toggleError } = await supabase.from("tasks").update({ completed: !completed }).eq("id", id);
+    if (toggleError) {
+      setError("Failed to toggle task: " + toggleError.message);
+    }
     fetchTasks();
   }
 
   async function deleteTask(id: string) {
-    await supabase.from("tasks").delete().eq("id", id);
+    setError(null);
+    const { error: deleteError } = await supabase.from("tasks").delete().eq("id", id);
+    if (deleteError) {
+      setError("Failed to delete task: " + deleteError.message);
+    }
     setTasks(tasks.filter(task => task.id !== id));
   }
 
@@ -94,8 +131,8 @@ export default function TaskPage() {
         <title>Task Manager | Reflectly</title>
       </Head>
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-      <main className={`flex-1 p-8 transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
-        <div className="flex items-center justify-between mb-8 ml-12">
+      <main className={`flex-1 p-8 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`}>
+        <div className="flex items-center justify-between mb-8">
           <h2 className={`text-3xl font-bold ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>📝 Task Manager</h2>
           <Link href="/dashboard/settings">
             <button className={`flex items-center gap-2 px-4 py-2 rounded-full ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white text-[#6C63A6]'} font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20`}>
@@ -103,6 +140,16 @@ export default function TaskPage() {
             </button>
           </Link>
         </div>
+        {statusWarning && (
+          <div className="mb-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 border border-yellow-300">
+            <b>Warning:</b> Your tasks table is missing the <code>status</code> column. Please add a <code>status</code> (text) column in Supabase for Kanban to work.
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-red-100 text-red-800 border border-red-300">
+            <b>Error:</b> {error}
+          </div>
+        )}
         {/* Add Task */}
         <div className="flex gap-4 mb-8">
           <input
@@ -123,35 +170,43 @@ export default function TaskPage() {
           </select>
           <button
             onClick={addTask}
-            className="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition"
+            disabled={adding || !newTask.trim()}
+            className={`flex items-center gap-2 px-5 py-2 rounded-full font-bold shadow transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30
+              ${adding || !newTask.trim() ? 'opacity-60 cursor-not-allowed' : ''}
+              bg-gradient-to-r from-[#A09ABC] via-[#B6A6CA] to-[#D5CFE1] text-white hover:from-[#B6A6CA] hover:to-[#A09ABC] animate-pulse`}
           >
             <FaPlus /> Add
           </button>
         </div>
-        {/* Kanban Board */}
+        {/* Kanban Board with Drag and Drop */}
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {STATUS_COLUMNS.map(col => (
-              <Droppable key={col.key} droppableId={col.key}>
-                {(provided: DroppableProvided) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+            {STATUS_COLUMNS.map((col, colIdx) => (
+              <Droppable droppableId={col.key} key={col.key}>
+                {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`rounded-2xl p-4 shadow-xl ${darkMode ? 'bg-[#23234a]' : col.color} min-h-[300px]`}
+                    className={`rounded-2xl p-4 shadow-xl min-h-[300px] flex flex-col transition-all duration-300
+                      ${darkMode ? 'bg-[#23234a]' : col.color}
+                      ${snapshot.isDraggingOver ? 'ring-4 ring-[#A09ABC]/40 scale-105' : ''}
+                      ${colIdx === 0 && collapsed ? 'pl-8' : ''}`}
                   >
                     <div className={`flex items-center gap-2 mb-4 text-lg font-bold ${darkMode ? 'text-[#A09ABC]' : 'text-white'}`}>{col.label}</div>
-                    <div className="space-y-4">
+                    <div className="space-y-4 flex-1">
                       {tasks.filter(task => (task.status || "todo") === col.key).length === 0 && (
                         <div className={`text-center italic ${darkMode ? 'text-[#A09ABC]' : 'text-white/80'}`}>No tasks</div>
                       )}
-                      {tasks.filter(task => (task.status || "todo") === col.key).map((task, index) => (
-                        <Draggable key={task.id} draggableId={String(task.id)} index={index}>
-                          {(provided: DraggableProvided) => (
+                      {tasks.filter(task => (task.status || "todo") === col.key).map((task, idx) => (
+                        <Draggable draggableId={String(task.id)} index={idx} key={task.id}>
+                          {(provided, snapshot) => (
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`rounded-xl p-4 shadow border ${darkMode ? 'bg-[#1a1a2e] border-[#23234a] text-[#A09ABC]' : 'bg-white/80 border-white/30 text-[#6C63A6]'} flex flex-col gap-2`}
+                              className={`rounded-xl p-4 shadow border flex flex-col gap-2 transition-all duration-200
+                                ${darkMode ? 'bg-[#1a1a2e] border-[#23234a] text-[#A09ABC]' : `${col.card} border-white/30 text-[#6C63A6]`}
+                                ${snapshot.isDragging ? 'ring-4 ring-[#A09ABC]/40 scale-105' : ''}`}
                             >
                               <div className="flex items-center gap-2">
                                 <input

@@ -28,6 +28,12 @@ export const DarkModeProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('darkMode', String(darkMode));
+      const html = document.documentElement;
+      if (darkMode) {
+        html.classList.add('dark');
+      } else {
+        html.classList.remove('dark');
+      }
     }
   }, [darkMode]);
 

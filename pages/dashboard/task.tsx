@@ -95,7 +95,7 @@ export default function TaskPage() {
       </Head>
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <main className={`flex-1 p-8 transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 ml-12">
           <h2 className={`text-3xl font-bold ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>📝 Task Manager</h2>
           <Link href="/dashboard/settings">
             <button className={`flex items-center gap-2 px-4 py-2 rounded-full ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white text-[#6C63A6]'} font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20`}>

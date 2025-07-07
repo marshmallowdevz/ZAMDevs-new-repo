@@ -3,6 +3,7 @@ import { supabase } from "../../lib/supabaseClient";
 import Sidebar from "../../components/Sidebar";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useDarkMode } from "../../components/DarkModeContext";
 import {
   BarChart,
   Bar,
@@ -27,6 +28,7 @@ export default function MoodTracker() {
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(true);
   const router = useRouter();
+  const { darkMode } = useDarkMode();
 
   useEffect(() => {
     fetchMoodData();
@@ -68,7 +70,7 @@ export default function MoodTracker() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA] items-center justify-center">
+      <div className={`flex min-h-screen items-center justify-center ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#A09ABC]"></div>
       </div>
     );
@@ -80,15 +82,15 @@ export default function MoodTracker() {
         <title>Mood Tracker - Reflectly</title>
         <meta name="description" content="Track your daily moods" />
       </Head>
-      <div className="flex min-h-screen bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]">
+      <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <main className={`flex-1 p-10 bg-transparent min-h-screen transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
+        <main className={`flex-1 p-10 min-h-screen transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-[#A09ABC] mb-6">🌈 Mood Tracker</h2>
-            <div className="mb-8 bg-white/60 p-6 rounded-xl shadow backdrop-blur-md border border-white/30">
+            <h2 className={`text-3xl font-bold mb-6 ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>🌈 Mood Tracker</h2>
+            <div className={`${darkMode ? 'bg-[#23234a]' : 'bg-white/60'} p-6 rounded-xl shadow backdrop-blur-md border ${darkMode ? 'border-[#23234a]' : 'border-white/30'} mb-8`}>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-[#6C63A6] mb-3">How are you feeling today?</h3>
+                  <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>How are you feeling today?</h3>
                   <div className="flex gap-3 text-2xl">
                     {moods.map((mood) => (
                       <button
@@ -97,7 +99,7 @@ export default function MoodTracker() {
                         className={`px-4 py-2 rounded-full transition-all duration-300 hover:scale-110 ${
                           selectedMood === mood 
                             ? 'bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white shadow-lg' 
-                            : 'bg-white/80 text-[#6C63A6] hover:bg-white'
+                            : darkMode ? 'bg-[#23234a] text-[#A09ABC] hover:bg-[#23234a]/80' : 'bg-white/80 text-[#6C63A6] hover:bg-white'
                         }`}
                       >
                         {mood}
@@ -115,18 +117,18 @@ export default function MoodTracker() {
               </div>
             </div>
 
-            <div className="bg-white/70 rounded-xl p-6 shadow border border-white/30 backdrop-blur-md mb-8">
-              <h3 className="text-xl font-semibold text-[#6C63A6] mb-4">Mood History</h3>
+            <div className={`${darkMode ? 'bg-[#23234a]' : 'bg-white/70'} rounded-xl p-6 shadow border ${darkMode ? 'border-[#23234a]' : 'border-white/30'} backdrop-blur-md mb-8`}>
+              <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>Mood History</h3>
               {moodData.length === 0 ? (
-                <div className="text-center text-[#6C63A6] py-4">
+                <div className={`text-center py-4 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>
                   No moods logged yet.
                 </div>
               ) : (
                 <ul className="space-y-2">
                   {moodData.map((mood) => (
-                    <li key={mood.id} className="flex justify-between items-center bg-white/80 p-3 rounded-lg">
+                    <li key={mood.id} className={`${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white/80 text-[#6C63A6]'} rounded-lg p-3 flex justify-between items-center`}>
                       <span className="text-xl">{mood.emoji}</span>
-                      <span className="text-[#6C63A6] text-sm">{new Date(mood.created_at).toLocaleString()}</span>
+                      <span className="text-sm">{new Date(mood.created_at).toLocaleString()}</span>
                       <button
                         onClick={() => deleteMood(mood.id)}
                         className="text-red-500 hover:text-red-700 text-sm"
@@ -139,10 +141,10 @@ export default function MoodTracker() {
               )}
             </div>
 
-            <div className="bg-white/70 rounded-xl p-6 shadow border border-white/30 backdrop-blur-md">
-              <h3 className="text-xl font-semibold text-[#6C63A6] mb-4">Mood Trends</h3>
+            <div className={`${darkMode ? 'bg-[#23234a]' : 'bg-white/70'} rounded-xl p-6 shadow border ${darkMode ? 'border-[#23234a]' : 'border-white/30'} backdrop-blur-md`}>
+              <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>Mood Trends</h3>
               {moodData.length === 0 ? (
-                <div className="text-center text-[#6C63A6] py-8">
+                <div className={`text-center py-8 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>
                   No mood data yet. Start tracking your moods above! 📊
                 </div>
               ) : (
@@ -163,9 +165,10 @@ export default function MoodTracker() {
                     <YAxis stroke="#A09ABC" />
                     <Tooltip 
                       contentStyle={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        border: '1px solid rgba(160, 154, 188, 0.3)',
-                        borderRadius: '8px'
+                        backgroundColor: darkMode ? '#23234a' : 'rgba(255, 255, 255, 0.9)',
+                        border: `1px solid ${darkMode ? '#A09ABC' : 'rgba(160, 154, 188, 0.3)'}`,
+                        borderRadius: '8px',
+                        color: darkMode ? '#A09ABC' : '#6C63A6'
                       }}
                     />
                     <Bar dataKey="moods" fill="#A09ABC" radius={[4, 4, 0, 0]} />

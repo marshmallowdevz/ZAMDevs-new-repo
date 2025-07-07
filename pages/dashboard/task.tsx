@@ -1,11 +1,24 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { TransitionContext } from "../_app";
+import Sidebar from "../../components/Sidebar";
+import { useDarkMode } from "../../components/DarkModeContext";
+import { FaCog, FaPlus, FaUserCircle } from "react-icons/fa";
+import Head from "next/head";
+import Link from "next/link";
+
+const STATUS_COLUMNS = [
+  { key: "todo", label: "Todo", color: "bg-[#A09ABC]" },
+  { key: "inprogress", label: "In Progress", color: "bg-[#B6A6CA]" },
+  { key: "review", label: "In Review", color: "bg-[#D5CFE1]" },
+  { key: "done", label: "Done", color: "bg-[#B6A6CA]" },
+];
 
 export default function TaskPage() {
+  const { darkMode } = useDarkMode();
+  const [collapsed, setCollapsed] = useState(true);
   const [tasks, setTasks] = useState<any[]>([]);
   const [newTask, setNewTask] = useState("");
-  const { showContent } = useContext(TransitionContext);
+  const [newStatus, setNewStatus] = useState("todo");
 
   useEffect(() => {
     fetchTasks();
@@ -14,13 +27,11 @@ export default function TaskPage() {
   async function fetchTasks() {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error || !session?.user) return;
-
     const { data } = await supabase
       .from("tasks")
       .select("*")
       .eq("user_id", session.user.id)
       .order("created_at", { ascending: false });
-
     setTasks(data || []);
   }
 
@@ -28,16 +39,20 @@ export default function TaskPage() {
     if (!newTask.trim()) return;
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error || !session?.user) return;
-
     const { data } = await supabase
       .from("tasks")
-      .insert([{ description: newTask, completed: false, user_id: session.user.id }])
+      .insert([{ description: newTask, completed: false, user_id: session.user.id, status: newStatus }])
       .select();
-
     if (data) {
       setTasks([data[0], ...tasks]);
       setNewTask("");
+      setNewStatus("todo");
     }
+  }
+
+  async function updateTaskStatus(id: string, status: string) {
+    await supabase.from("tasks").update({ status }).eq("id", id);
+    fetchTasks();
   }
 
   async function toggleTask(id: string, completed: boolean) {
@@ -51,45 +66,89 @@ export default function TaskPage() {
   }
 
   return (
-    <div className={`max-w-3xl mx-auto p-6 min-h-screen transition-all duration-700 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-      <h2 className="text-3xl font-bold text-[#A09ABC] mb-6">📝 Task Manager</h2>
-
-      {/* Add Task */}
-      <div className="mb-6 flex gap-4 items-center">
-        <input
-          type="text"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          placeholder="Add a new task..."
-          className="flex-1 px-4 py-2 rounded-lg bg-white/70 text-[#6C63A6] focus:outline-none focus:ring-2 focus:ring-[#A09ABC]"
-        />
-        <button
-          onClick={addTask}
-          className="px-5 py-2 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition"
-        >
-          ➕ Add
-        </button>
-      </div>
-
-      {/* Task List */}
-      <ul className="space-y-3">
-        {tasks.map(task => (
-          <li key={task.id} className="flex items-center justify-between bg-white/60 p-4 rounded-xl shadow border border-white/30">
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={task.completed}
-                onChange={() => toggleTask(task.id, task.completed)}
-                className="h-5 w-5 text-[#A09ABC]"
-              />
-              <span className={`text-[#6C63A6] ${task.completed ? 'line-through opacity-60' : ''}`}>
-                {task.description}
-              </span>
+    <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
+      <Head>
+        <title>Task Manager | Reflectly</title>
+      </Head>
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      <main className={`flex-1 p-8 transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className={`text-3xl font-bold ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>📝 Task Manager</h2>
+          <Link href="/dashboard/settings">
+            <button className={`flex items-center gap-2 px-4 py-2 rounded-full ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white text-[#6C63A6]'} font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20`}>
+              <FaCog /> Settings
+            </button>
+          </Link>
+        </div>
+        {/* Add Task */}
+        <div className="flex gap-4 mb-8">
+          <input
+            type="text"
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+            placeholder="Add a new task..."
+            className={`flex-1 px-4 py-2 rounded-lg ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white/70 text-[#6C63A6]'} focus:outline-none focus:ring-2 focus:ring-[#A09ABC]`}
+          />
+          <select
+            value={newStatus}
+            onChange={e => setNewStatus(e.target.value)}
+            className={`px-3 py-2 rounded-lg ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white/70 text-[#6C63A6]'} border border-[#A09ABC]/30`}
+          >
+            {STATUS_COLUMNS.map(col => (
+              <option key={col.key} value={col.key}>{col.label}</option>
+            ))}
+          </select>
+          <button
+            onClick={addTask}
+            className="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition"
+          >
+            <FaPlus /> Add
+          </button>
+        </div>
+        {/* Kanban Board */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {STATUS_COLUMNS.map(col => (
+            <div key={col.key} className={`rounded-2xl p-4 shadow-xl ${darkMode ? 'bg-[#23234a]' : col.color} min-h-[300px]`}>
+              <div className={`flex items-center gap-2 mb-4 text-lg font-bold ${darkMode ? 'text-[#A09ABC]' : 'text-white'}`}>{col.label}</div>
+              <div className="space-y-4">
+                {tasks.filter(task => (task.status || "todo") === col.key).length === 0 && (
+                  <div className={`text-center italic ${darkMode ? 'text-[#A09ABC]' : 'text-white/80'}`}>No tasks</div>
+                )}
+                {tasks.filter(task => (task.status || "todo") === col.key).map(task => (
+                  <div key={task.id} className={`rounded-xl p-4 shadow border ${darkMode ? 'bg-[#1a1a2e] border-[#23234a] text-[#A09ABC]' : 'bg-white/80 border-white/30 text-[#6C63A6]'} flex flex-col gap-2`}>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={task.completed}
+                        onChange={() => toggleTask(task.id, task.completed)}
+                        className="h-5 w-5 text-[#A09ABC]"
+                      />
+                      <span className={`font-semibold ${task.completed ? 'line-through opacity-60' : ''}`}>{task.description}</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <FaUserCircle className="text-xl" />
+                      <span className="text-xs">You</span>
+                      <span className={`ml-auto text-xs px-2 py-1 rounded-full ${col.key === 'done' ? 'bg-green-400/30 text-green-700' : col.key === 'review' ? 'bg-yellow-200/30 text-yellow-700' : col.key === 'inprogress' ? 'bg-blue-200/30 text-blue-700' : 'bg-[#A09ABC]/20 text-[#A09ABC]'}`}>{col.label}</span>
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      {STATUS_COLUMNS.filter(s => s.key !== col.key).map(s => (
+                        <button
+                          key={s.key}
+                          onClick={() => updateTaskStatus(task.id, s.key)}
+                          className={`text-xs px-2 py-1 rounded-full border ${darkMode ? 'border-[#A09ABC] text-[#A09ABC]' : 'border-[#A09ABC] text-[#6C63A6]'} hover:bg-[#A09ABC]/10 transition`}
+                        >
+                          Move to {s.label}
+                        </button>
+                      ))}
+                      <button onClick={() => deleteTask(task.id)} className="ml-auto text-red-500 hover:underline text-xs">🗑️</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <button onClick={() => deleteTask(task.id)} className="text-red-500 hover:underline">🗑️</button>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </div>
+      </main>
     </div>
   );
 }

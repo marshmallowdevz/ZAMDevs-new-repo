@@ -4,6 +4,7 @@ import { supabase } from "../../lib/supabaseClient";
 import Sidebar from "../../components/Sidebar";
 import Head from "next/head";
 import { TransitionContext } from "../_app";
+import { useDarkMode } from "../../components/DarkModeContext";
 
 type JournalEntry = {
 id: string;
@@ -28,6 +29,7 @@ const [showText, setShowText] = useState(false);
 const { showContent } = useContext(TransitionContext);
 const [profileLoading, setProfileLoading] = useState(false);
 const [profileSuccess, setProfileSuccess] = useState(false);
+const { darkMode } = useDarkMode();
 
 useEffect(() => {
 setTimeout(() => setShowText(true), 100);
@@ -80,7 +82,7 @@ setTimeout(() => setProfileSuccess(false), 3000);
 }
 
 return (
-<div className="relative min-h-screen w-full flex animate-gradient-bg overflow-hidden">
+<div className={`relative min-h-screen w-full flex animate-gradient-bg overflow-hidden ${darkMode ? 'bg-[#1a1a2e]' : ''}`}>
 <Head>
 <title>Account | Reflectly</title>
 </Head>
@@ -107,7 +109,7 @@ return (
 <div className="absolute left-1/2 top-1/6 text-[#fff] text-lg opacity-60 z-0 animate-twinkle" style={{ animationDelay: "2s" }}>✦</div>
 {/* Main Content */}
 <main className={`flex-1 ${collapsed ? 'mx-auto' : 'ml-64'} flex items-center justify-center p-6 min-h-screen`}>
-<div className={`relative z-20 w-full max-w-2xl mx-auto px-0 py-0 bg-white/10 rounded-3xl shadow-2xl backdrop-blur-md transition-all duration-700 ${showText && showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+<div className={`relative z-20 w-full max-w-2xl mx-auto px-0 py-0 ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white/10'} rounded-3xl shadow-2xl backdrop-blur-md transition-all duration-700 ${showText && showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
 {/* Header Banner */}
 <div className="relative h-56 w-full bg-gradient-to-r from-[#A09ABC]/40 to-[#B6A6CA]/40 rounded-t-3xl overflow-hidden flex items-center justify-center">
 <Image
@@ -154,40 +156,38 @@ style={{ minWidth: 140 }}
 <input
 value={name}
 onChange={e => setName(e.target.value)}
-className="text-2xl md:text-3xl font-serif font-bold bg-transparent border-none w-full text-center mb-2 text-[#ede9fe] drop-shadow focus:outline-none"
+className={`text-2xl md:text-3xl font-serif font-bold bg-transparent border-none w-full text-center mb-2 ${darkMode ? 'text-[#A09ABC]' : 'text-[#ede9fe]'} drop-shadow focus:outline-none`}
 />
-<div className="text-[#6C63A6] mb-2 text-center text-lg font-semibold drop-shadow">{email}</div>
+<div className={`mb-2 text-center text-lg font-semibold drop-shadow ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>{email}</div>
 <input
 value={phone}
 onChange={e => setPhone(e.target.value)}
-className="text-[#6C63A6] mb-2 text-center text-base font-medium bg-transparent border-none w-full focus:outline-none"
+className={`mb-2 text-center text-base font-medium bg-transparent border-none w-full focus:outline-none ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}
 placeholder="Phone number"
 />
 <textarea
 value={bio}
 onChange={e => setBio(e.target.value)}
-className="bg-transparent border-none w-full text-center text-[#6C63A6] mb-4 font-medium focus:outline-none"
+className={`bg-transparent border-none w-full text-center mb-4 font-medium focus:outline-none ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}
 rows={2}
 />
 </div>
 {/* Journal Entries */}
 <div className="mt-12">
-            <h3 className="text-xl md:text-2xl font-serif font-bold text-[#A09ABC] mb-4 drop-shadow mx-6 my-4">Your Journal Entries</h3>
-            <h3 className="text-xl md:text-2xl font-serif font-bold text-[#A09ABC] mb-4 drop-shadow">Your Journal Entries</h3>
+            <h3 className={`text-xl md:text-2xl font-serif font-bold mb-4 drop-shadow mx-6 my-4 ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>Your Journal Entries</h3>
 <div className="space-y-4">
 {journalEntries.length === 0 && (
   <div>
-    <div className="text-[#B6A6CA] text-center mx-6 my-4">No journal entries yet.</div>
-    <div className="text-[#B6A6CA] text-center">No journal entries yet.</div>
+    <div className={`${darkMode ? 'text-[#A09ABC]' : 'text-[#B6A6CA]'} text-center mx-6 my-4`}>No journal entries yet.</div>
   </div>
 )}
 {journalEntries.map((entry: JournalEntry) => (
-<div key={entry.id} className="bg-white/70 rounded-xl p-4 shadow flex flex-col border border-white/30">
-<div className="text-sm text-[#A09ABC] mb-1">
+<div key={entry.id} className={`${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white/70 text-[#6C63A6]'} rounded-xl p-4 shadow flex flex-col border ${darkMode ? 'border-[#23234a]' : 'border-white/30'}`}>
+<div className={`text-sm mb-1 ${darkMode ? 'text-[#B6A6CA]' : 'text-[#A09ABC]'}`}>
 {new Date(entry.created_at).toLocaleString()}
 </div>
-<div className="font-semibold text-[#6C63A6]">{entry.title}</div>
-<div className="text-[#6C63A6]">{entry.content}</div>
+<div className="font-semibold">{entry.title}</div>
+<div>{entry.content}</div>
 </div>
 ))}
 </div>

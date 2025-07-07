@@ -9,16 +9,12 @@ import {
   FaMoon, FaPalette, FaGlobe, FaBell,
   FaLock, FaInfoCircle, FaQuestionCircle,
 } from "react-icons/fa";
+import { useDarkMode } from "../../components/DarkModeContext";
 
 export default function Settings() {
   const [collapsed, setCollapsed] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('darkMode') === 'true';
-    }
-    return false;
-  });
+  const { darkMode, setDarkMode } = useDarkMode();
 
   const router = useRouter();
 
@@ -51,7 +47,7 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]">
+      <div className={`flex min-h-screen items-center justify-center ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#A09ABC]" />
       </div>
     );
@@ -69,19 +65,14 @@ export default function Settings() {
             <h2 className="text-2xl font-bold text-center text-[#A09ABC] mb-4">Settings</h2>
 
             {/* Dark Mode Toggle */}
-            <div className="bg-white/80 rounded-2xl shadow p-4">
+            <div className={`${darkMode ? 'bg-[#23234a]' : 'bg-white/80'} rounded-2xl shadow p-4`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 text-[#6C63A6] font-medium">
                   <FaMoon className="text-xl" />
                   Dark Mode
                 </div>
                 <button
-                  onClick={() => {
-                    setDarkMode(prev => {
-                      localStorage.setItem('darkMode', String(!prev));
-                      return !prev;
-                    });
-                  }}
+                  onClick={() => setDarkMode(!darkMode)}
                   className={`w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out ${darkMode ? 'bg-[#A09ABC]' : 'bg-gray-300'}`}
                 >
                   <div
@@ -92,7 +83,7 @@ export default function Settings() {
             </div>
 
             {/* Preferences List */}
-            <div className="bg-white/80 rounded-2xl shadow p-4 space-y-4">
+            <div className={`${darkMode ? 'bg-[#23234a]' : 'bg-white/80'} rounded-2xl shadow p-4 space-y-4`}>
               {preferences.map((item, index) => (
                 <div key={index} className="flex items-center justify-between border-b border-[#D5CFE1] pb-3">
                   <div className="flex items-center gap-4 text-[#6C63A6]">
@@ -108,7 +99,7 @@ export default function Settings() {
             <div className="space-y-3 pt-2">
               <Link href="/settings/password">
                 <button
-                  className="w-full px-6 py-3 rounded-full bg-white text-[#6C63A6] font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20"
+                  className={`w-full px-6 py-3 rounded-full ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white text-[#6C63A6]'} font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20`}
                 >
                   🔒 Change Password
                 </button>

@@ -45,6 +45,36 @@ function FeedbackForm({ onSend }: { onSend: () => void }) {
   );
 }
 
+function ChangePasswordForm({ onSuccess, onError }: { onSuccess: () => void, onError: (msg: string) => void }) {
+  const [current, setCurrent] = useState('');
+  const [newPass, setNewPass] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
+  return (
+    <form
+      className="flex flex-col gap-2"
+      onSubmit={async e => {
+        e.preventDefault();
+        if (newPass !== confirm) {
+          onError('New passwords do not match.');
+          return;
+        }
+        setLoading(true);
+        // Supabase does not require current password for updateUser, but you can check it if you want
+        const { error } = await supabase.auth.updateUser({ password: newPass });
+        setLoading(false);
+        if (error) onError(error.message);
+        else onSuccess();
+      }}
+    >
+      <input type="password" placeholder="Current Password" className="p-2 rounded border border-[#A09ABC]/30" value={current} onChange={e => setCurrent(e.target.value)} required />
+      <input type="password" placeholder="New Password" className="p-2 rounded border border-[#A09ABC]/30" value={newPass} onChange={e => setNewPass(e.target.value)} required />
+      <input type="password" placeholder="Confirm New Password" className="p-2 rounded border border-[#A09ABC]/30" value={confirm} onChange={e => setConfirm(e.target.value)} required />
+      <button type="submit" className="mt-2 px-4 py-2 rounded bg-[#A09ABC] text-white font-semibold" disabled={loading}>{loading ? 'Saving...' : 'Change Password'}</button>
+    </form>
+  );
+}
+
 export default function Settings() {
   const [collapsed, setCollapsed] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -54,6 +84,10 @@ export default function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [modal, setModal] = useState<{title: string, content: React.ReactNode} | null>(null);
   const [feedbackSent, setFeedbackSent] = useState(false);
+  const [changePw, setChangePw] = useState(false);
+  const [changePwSuccess, setChangePwSuccess] = useState(false);
+  const [changePwError, setChangePwError] = useState<string | null>(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const router = useRouter();
 
@@ -136,6 +170,44 @@ export default function Settings() {
           modal?.content
         )}
       </Modal>
+      <Modal
+        open={changePw}
+        onClose={() => { setChangePw(false); setChangePwSuccess(false); setChangePwError(null); }}
+        title="Change Password"
+      >
+        {changePwSuccess ? (
+          <div className="text-green-600 font-semibold">Password changed successfully!</div>
+        ) : (
+          <>
+            <ChangePasswordForm
+              onSuccess={() => { setChangePwSuccess(true); setChangePwError(null); }}
+              onError={msg => setChangePwError(msg)}
+            />
+            {changePwError && <div className="text-red-600 text-sm mt-2">{changePwError}</div>}
+          </>
+        )}
+      </Modal>
+      <Modal
+        open={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        title="Confirm Logout"
+      >
+        <div className="mb-4">Are you sure you want to log out?</div>
+        <div className="flex gap-4 justify-end">
+          <button
+            className="px-4 py-2 rounded bg-gray-200 text-[#6C63A6] font-semibold"
+            onClick={() => setShowLogoutConfirm(false)}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 rounded bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-semibold"
+            onClick={handleLogout}
+          >
+            Log Out
+          </button>
+        </div>
+      </Modal>
       <div className={`flex min-h-screen transition-colors duration-300 items-center justify-center ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
         <main className={`flex-1 flex items-center justify-center p-6 transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
@@ -214,15 +286,14 @@ export default function Settings() {
               </ul>
             </div>
             <div className="px-6 pb-8 pt-2 space-y-3">
-              <Link href="/settings/password">
-                <button
-                  className={`w-full px-6 py-3 rounded-full ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white text-[#6C63A6]'} font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20`}
-                >
-                  🔒 Change Password
-                </button>
-              </Link>
               <button
-                onClick={handleLogout}
+                onClick={() => setChangePw(true)}
+                className={`w-full px-6 py-3 rounded-full ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white text-[#6C63A6]'} font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20`}
+              >
+                🔒 Change Password
+              </button>
+              <button
+                onClick={() => setShowLogoutConfirm(true)}
                 className="w-full px-6 py-3 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 flex items-center justify-center gap-2"
               >
                 <FaSignOutAlt /> Log Out

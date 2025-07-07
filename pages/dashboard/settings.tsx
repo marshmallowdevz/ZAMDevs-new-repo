@@ -1,9 +1,14 @@
+// pages/settings/index.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import Sidebar from "../../components/Sidebar";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { FaMoon, FaPalette, FaGlobe, FaBell, FaLock, FaInfoCircle, FaQuestionCircle } from "react-icons/fa";
+import Link from "next/link";
+import {
+  FaMoon, FaPalette, FaGlobe, FaBell,
+  FaLock, FaInfoCircle, FaQuestionCircle,
+} from "react-icons/fa";
 
 export default function Settings() {
   const [collapsed, setCollapsed] = useState(true);
@@ -14,6 +19,7 @@ export default function Settings() {
     }
     return false;
   });
+
   const router = useRouter();
 
   useEffect(() => {
@@ -31,20 +37,6 @@ export default function Settings() {
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push("/auth/login");
-  }
-
-  async function handleChangePassword() {
-    const email = prompt("Please confirm your email for password reset:", "");
-    if (email) {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset`
-      });
-      if (error) {
-        alert("Failed to send reset email: " + error.message);
-      } else {
-        alert("Password reset email sent!");
-      }
-    }
   }
 
   const preferences = [
@@ -114,12 +106,13 @@ export default function Settings() {
 
             {/* Action Buttons */}
             <div className="space-y-3 pt-2">
-              <button
-                onClick={handleChangePassword}
-                className="w-full px-6 py-3 rounded-full bg-white text-[#6C63A6] font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20"
-              >
-                🔒 Change Password
-              </button>
+              <Link href="/settings/password">
+                <button
+                  className="w-full px-6 py-3 rounded-full bg-white text-[#6C63A6] font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20"
+                >
+                  🔒 Change Password
+                </button>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="w-full px-6 py-3 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300"

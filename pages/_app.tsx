@@ -1,17 +1,16 @@
-
-
 import '../styles/globals.css';
+import { useEffect, useState } from "react";
+import { Toaster } from "react-hot-toast";
 import type { AppProps } from "next/app";
-import { useEffect, useState, createContext } from "react";
 import { useRouter } from "next/router";
+import { createContext } from "react";
 
-// Context to let pages know when to animate content in
-export const TransitionContext = createContext({ showContent: true });
+export const TransitionContext = createContext<{ showContent: boolean }>({ showContent: true });
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const [showOverlay, setShowOverlay] = useState(false);
   const [showContent, setShowContent] = useState(true);
+  const [showOverlay, setShowOverlay] = useState(false);
 
   useEffect(() => {
     const handleStart = () => {
@@ -36,6 +35,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <TransitionContext.Provider value={{ showContent }}>
+      <Toaster position="top-right" reverseOrder={false} />
       {/* Global transition overlay */}
       <div
         className={`fixed inset-0 z-[100] pointer-events-none transition-opacity duration-500 ${showOverlay ? 'opacity-100' : 'opacity-0'}`}
@@ -45,3 +45,4 @@ export default function App({ Component, pageProps }: AppProps) {
     </TransitionContext.Provider>
   );
 }
+

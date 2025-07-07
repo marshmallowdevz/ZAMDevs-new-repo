@@ -1,11 +1,8 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import { supabase } from "../../lib/supabaseClient";
 import Head from "next/head";
 import { TransitionContext } from "../_app";
-import { FiBell } from "react-icons/fi";
-import Link from "next/link";
 import { motion } from "framer-motion";
 
 const palette = {
@@ -18,7 +15,6 @@ const palette = {
 };
 
 export default function Signup() {
-  const [animate, setAnimate] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -31,15 +27,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
-  const [showText, setShowText] = useState(false);
-  const { showContent } = useContext(TransitionContext);
-  const [accountExists, setAccountExists] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => setAnimate(true), 400);
-    setTimeout(() => setShowText(true), 100);
-  }, []);
-
+  useContext(TransitionContext);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -73,9 +61,7 @@ export default function Signup() {
       
       if (error) {
         console.error("Auth error:", error);
-        if (error.message && error.message.toLowerCase().includes("already registered")) {
-          setAccountExists(true);
-        }
+        // Optionally, handle the "already registered" error here if needed
         setError(error.message);
         setLoading(false);
         return;
@@ -164,7 +150,7 @@ export default function Signup() {
             <div className="flex items-center gap-1 text-[10px] md:text-xs text-[#6C63A6] font-light mt-1">
               <input type="checkbox" required id="terms" className="accent-[#A09ABC]" />
               <label htmlFor="terms">
-                I've read and agree with Terms of Service and our <a href="#" className="underline">Privacy Policy</a>
+                I&apos;ve read and agree with Terms of Service and our <a href="#" className="underline">Privacy Policy</a>
               </label>
             </div>
             <button className="mt-2 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-base md:text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30 w-full" type="submit" disabled={success || loading}>

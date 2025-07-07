@@ -1,6 +1,6 @@
-import Head from "next/head";
+import React, { useState } from 'react';
+import Head from 'next/head';
 import Link from "next/link";
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const palette = {
@@ -170,7 +170,7 @@ export default function Home() {
                   About Reflectly
                 </h2>
                 <p className="mb-8 text-lg text-[#A09ABC] text-center" style={{ fontFamily: 'DM Serif Display, serif' }}>
-                  Reflectly is a minimalist journaling application designed to foster consistent self-reflection and emotional awareness. The app enables users to write daily entries, tag moods, and revisit past reflections in a serene, clutter-free environment. With privacy at its core, Reflectly offers a personal space for users to process thoughts, track patterns, and develop emotional resilience.
+                  Reflectly is your personal mindfulness companion. This journaling app helps you reflect, grow, and stay in tune with your emotions. You can write daily entries, tag how you feel, and look back on your past reflections in a calm and clutter-free space. Whether you&#39;re having a great day or facing challenges, Reflectly gives you a safe and private place to understand your thoughts and build emotional strength. It&#39;s simple, serene, and designed to support your journey every step of the way.
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.08 }}
@@ -193,53 +193,15 @@ export default function Home() {
               className="flex flex-col items-center justify-center min-h-screen w-full relative"
             >
               <motion.div
-                className="z-10 p-10 bg-white/80 rounded-3xl shadow-2xl backdrop-blur-md flex flex-col items-center max-w-5xl"
+                className="z-10 p-10 bg-white/80 rounded-3xl shadow-2xl backdrop-blur-md flex flex-col items-center max-w-2xl"
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, ease: "easeOut" }}
               >
-                <h2 className="font-serif text-3xl md:text-4xl font-bold text-[#A09ABC] mb-8" style={{ fontFamily: 'DM Serif Display, serif' }}>
+                <h2 className="font-serif text-3xl md:text-4xl font-bold text-[#A09ABC] mb-4" style={{ fontFamily: 'DM Serif Display, serif' }}>
                   Features
                 </h2>
-                <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-center justify-center my-8">
-                  {[
-                    "Create, edit, and delete daily journal entries with ease",
-                    "Mood tagging via intuitive emoji or slider system",
-                    "Interactive calendar for mood and entry history tracking",
-                    "Minimalist user interface with light and dark mode options",
-                    "Enhanced privacy with biometric login and optional app lock",
-                    "Smart reminders to encourage consistent journaling habits",
-                    "Voice-to-text functionality for hands-free entry creation",
-                    "Support for attaching photos, audio, and other media to entries",
-                    "Full offline functionality to access and edit entries without internet",
-                    "Time capsule feature to schedule future resurfacing of selected entries",
-                    "Cross-platform syncing for seamless access on mobile, web, and desktop",
-                    "Mood analytics and trend visualization to monitor emotional patterns over time",
-                  ].map((feature, idx) => (
-                    <motion.div
-                      key={feature}
-                      className="bg-white/60 rounded-2xl p-6 shadow-xl backdrop-blur-md border border-white/30 flex items-center justify-center text-center text-[#6C63A6] font-medium min-h-[120px] cursor-pointer transition-all"
-                      initial={{ opacity: 0, y: 40 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 40 }}
-                      whileHover={{ y: -12, scale: 1.04, boxShadow: "0 8px 32px 0 #A09ABC33" }}
-                      transition={{ duration: 0.5, delay: 0.05 * idx, type: "spring" }}
-                    >
-                      {feature}
-                    </motion.div>
-                  ))}
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={nextSlide}
-                  className="px-10 py-4 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-semibold text-xl shadow-lg hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30"
-                >
-                  Proceed
-                </motion.button>
-                {current > 0 && (
-                  <button onClick={prevSlide} className="absolute left-4 top-4 text-[#A09ABC] underline">Back</button>
-                )}
+                <FeatureToggle nextSlide={nextSlide} prevSlide={prevSlide} />
               </motion.div>
             </motion.section>
           )}
@@ -261,22 +223,88 @@ export default function Home() {
                 <h2 className="font-serif text-3xl md:text-4xl font-bold text-[#A09ABC] mb-4" style={{ fontFamily: 'DM Serif Display, serif' }}>
                   Get Started
                 </h2>
-                <div className="flex gap-6 mt-4">
-                  <Link href="/auth/login" legacyBehavior>
-                    <a className="px-8 py-3 rounded-full bg-white/80 text-[#A09ABC] font-bold text-lg shadow border border-[#A09ABC] hover:bg-[#E1D8E9] transition-all duration-300">Log In</a>
-                  </Link>
-                  <Link href="/auth/login" legacyBehavior>
-                    <a className="px-8 py-3 rounded-full bg-white/80 text-[#A09ABC] font-bold text-lg shadow border border-[#A09ABC] hover:bg-[#E1D8E9] transition-all duration-300">Log In</a>
-                  </Link>
-                </div>
+                  <div className="flex gap-6 mt-4">
+                    <Link href="/auth/signup" passHref legacyBehavior>
+                      <a className="px-8 py-3 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300">Sign Up</a>
+                    </Link>
+                    <Link href="/auth/login" passHref legacyBehavior>
+                      <a className="px-8 py-3 rounded-full bg-white/80 text-[#A09ABC] font-bold text-lg shadow border border-[#A09ABC] hover:bg-[#E1D8E9] transition-all duration-300">Log In</a>
+                    </Link>
+                  </div>
+                </motion.div>
                 {current > 0 && (
                   <button onClick={prevSlide} className="absolute left-4 top-4 text-[#A09ABC] underline">Back</button>
                 )}
-              </motion.div>
             </motion.section>
           )}
         </AnimatePresence>
       </div>
+    </div>
+  );
+}
+
+// Add this above your Home component or in the same file:
+
+function FeatureToggle({ nextSlide, prevSlide }: { nextSlide: () => void; prevSlide: () => void }) {
+  const [show, setShow] = useState(false);
+  if (!show) {
+    return (
+      <div className="flex flex-col items-center gap-6 w-full">
+        <button
+          onClick={() => setShow(true)}
+          className="px-10 py-4 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-semibold text-xl shadow-lg hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300"
+          style={{ minWidth: 180 }}
+        >
+          Show Features
+        </button>
+        <div className="flex gap-6 mt-2">
+          <button
+            onClick={nextSlide}
+            className="px-10 py-4 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-semibold text-xl shadow-lg hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300"
+            style={{ minWidth: 180 }}
+          >
+            Skip
+          </button>
+          <button
+            onClick={prevSlide}
+            className="px-10 py-4 rounded-full bg-white/80 text-[#A09ABC] font-semibold text-xl shadow border border-[#A09ABC] hover:bg-[#E1D8E9] transition-all duration-300"
+            style={{ minWidth: 180 }}
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="w-full flex flex-col items-center">
+      <div className="flex flex-col items-center mb-4">
+        <span className="text-4xl mb-2">🌟</span>
+        <p className="text-[#A09ABC] text-lg text-center font-serif italic mb-2">
+          Explore what makes Reflectly magical!
+        </p>
+      </div>
+      <ul className="text-[#6C63A6] text-lg mt-2 space-y-3 text-left list-none w-full max-w-xl mx-auto">
+        <li>📝 <b>Easy Journaling:</b> Create, edit, and delete daily journal entries with ease</li>
+        <li>😊 <b>Mood Tagging:</b> Intuitive emoji or slider system for your feelings</li>
+        <li>📅 <b>Calendar View:</b> Interactive calendar for mood and entry history tracking</li>
+        <li>🌗 <b>Minimalist UI:</b> Light and dark mode options for every mood</li>
+        <li>🔒 <b>Privacy First:</b> Biometric login and optional app lock</li>
+        <li>⏰ <b>Smart Reminders:</b> Encourages consistent journaling habits</li>
+        <li>🎤 <b>Voice-to-Text:</b> Hands-free entry creation</li>
+        <li>📎 <b>Media Attachments:</b> Add photos, audio, and more to your entries</li>
+        <li>📡 <b>Offline Access:</b> Journal anywhere, anytime—no internet needed</li>
+        <li>⏳ <b>Time Capsule:</b> Schedule future resurfacing of special entries</li>
+        <li>🔗 <b>Cross-Platform Sync:</b> Seamless access on mobile, web, and desktop</li>
+        <li>📊 <b>Mood Analytics:</b> Visualize your emotional patterns over time</li>
+      </ul>
+      <button
+        onClick={nextSlide}
+        className="mt-8 px-10 py-4 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-semibold text-xl shadow-lg hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300"
+        style={{ minWidth: 180 }}
+      >
+        Proceed
+      </button>
     </div>
   );
 }

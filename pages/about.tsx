@@ -30,7 +30,7 @@ export default function About() {
       <div className={`flex-1 flex flex-col items-center md:items-start justify-center z-10 transition-all duration-700 ${show && showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         <h1 className="font-serif text-3xl md:text-4xl font-bold text-[#A09ABC] mb-4">About Reflectly</h1>
         <p className="text-lg md:text-xl text-[#6C63A6] max-w-xl text-center md:text-left mb-8">
-          Reflectly is a minimalist journaling application designed to foster consistent self-reflection and emotional awareness. The app enables users to write daily entries, tag moods, and revisit past reflections in a serene, clutter-free environment. With privacy at its core, Reflectly offers a personal space for users to process thoughts, track patterns, and develop emotional resilience.
+          Reflectly is your personal mindfulness companion. This minimalist journaling app helps you reflect, grow, and stay in tune with your emotions. You can write daily entries, tag how you feel, and look back on your past reflections in a calm and clutter-free space. Whether you&apos;re having a great day or facing challenges, Reflectly gives you a safe and private place to understand your thoughts and build emotional strength. It&apos;s simple, serene, and designed to support your journey every step of the way.
         </p>
         <button
           onClick={() => router.push('/auth/login')}

@@ -12,6 +12,8 @@ import {
 } from "react-icons/fa";
 import { useDarkMode } from "../../components/DarkModeContext";
 import LegalModal from "../../components/LegalModal";
+import Terms from "../terms";
+import PrivacyPolicy from "../privacy";
 
 function Modal({ open, onClose, title, children }: { open: boolean, onClose: () => void, title: string, children: React.ReactNode }) {
   if (!open) return null;
@@ -90,6 +92,9 @@ export default function Settings() {
   const [changePwError, setChangePwError] = useState<string | null>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [agreedTerms, setAgreedTerms] = useState(false);
 
   const router = useRouter();
 
@@ -332,15 +337,31 @@ export default function Settings() {
               </ul>
             </div>
             <div className="px-6 pb-8 pt-2 space-y-3">
-                <button
+              <div className="flex flex-col gap-2 mt-4">
+                <div className="flex items-center gap-1 text-xs text-[#6C63A6] font-light">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    className="accent-[#A09ABC]"
+                    checked={agreedTerms}
+                    onChange={e => setAgreedTerms(e.target.checked)}
+                  />
+                  <label htmlFor="terms">
+                    I&apos;ve read and agree with <button type="button" className="underline text-[#6C63A6] hover:text-[#A09ABC]" style={{background:'none',border:'none',padding:0,cursor:'pointer'}} onClick={() => setShowTerms(true)}>Terms of Service</button> and our <button type="button" className="underline text-[#6C63A6] hover:text-[#A09ABC]" style={{background:'none',border:'none',padding:0,cursor:'pointer'}} onClick={() => setShowPrivacy(true)}>Privacy Policy</button>
+                  </label>
+                </div>
+              </div>
+              <button
                 onClick={() => setChangePw(true)}
                 className={`w-full px-6 py-3 rounded-full ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white text-[#6C63A6]'} font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20`}
-                >
-                  🔒 Change Password
-                </button>
+                disabled={!agreedTerms}
+              >
+                🔒 Change Password
+              </button>
               <button
                 onClick={() => setShowLogoutConfirm(true)}
                 className="w-full px-6 py-3 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 flex items-center justify-center gap-2"
+                disabled={!agreedTerms}
               >
                 <FaSignOutAlt /> Log Out
               </button>
@@ -348,6 +369,12 @@ export default function Settings() {
           </div>
         </main>
       </div>
+      <LegalModal open={showTerms} onClose={() => setShowTerms(false)} title="Terms of Service">
+        <Terms />
+      </LegalModal>
+      <LegalModal open={showPrivacy} onClose={() => setShowPrivacy(false)} title="Privacy Policy">
+        <PrivacyPolicy />
+      </LegalModal>
     </>
   );
 }

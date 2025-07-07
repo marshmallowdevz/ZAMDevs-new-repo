@@ -4,6 +4,9 @@ import { supabase } from "../../lib/supabaseClient";
 import Head from "next/head";
 import { TransitionContext } from "../_app";
 import { motion } from "framer-motion";
+import LegalModal from "../../components/LegalModal";
+import Terms from "../terms";
+import PrivacyPolicy from "../privacy";
 
 const palette = {
   nostalgia1: "#A09ABC",
@@ -28,6 +31,9 @@ export default function Signup() {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
   useContext(TransitionContext);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [agreedTerms, setAgreedTerms] = useState(false);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -148,12 +154,19 @@ export default function Signup() {
             <label htmlFor="phone" className="text-[#6C63A6] font-semibold text-xs md:text-sm mt-1">Phone Number</label>
             <input id="phone" name="phone" type="tel" required value={form.phone} onChange={handleChange} className="p-1 md:p-2 rounded-lg border border-[#D5CFE1] bg-white/80 text-[#6C63A6] text-xs md:text-sm placeholder-[#A09ABC] focus:outline-none focus:ring-2 focus:ring-[#A09ABC] transition-all duration-200 hover:shadow-lg w-full" />
             <div className="flex items-center gap-1 text-[10px] md:text-xs text-[#6C63A6] font-light mt-1">
-              <input type="checkbox" required id="terms" className="accent-[#A09ABC]" />
+              <input
+                type="checkbox"
+                id="terms"
+                className="accent-[#A09ABC]"
+                checked={agreedTerms}
+                onChange={e => setAgreedTerms(e.target.checked)}
+                required
+              />
               <label htmlFor="terms">
-                I&apos;ve read and agree with Terms of Service and our <a href="#" className="underline">Privacy Policy</a>
+                I&apos;ve read and agree with <button type="button" className="underline text-[#6C63A6] hover:text-[#A09ABC]" style={{background:'none',border:'none',padding:0,cursor:'pointer'}} onClick={() => setShowTerms(true)}>Terms of Service</button> and our <button type="button" className="underline text-[#6C63A6] hover:text-[#A09ABC]" style={{background:'none',border:'none',padding:0,cursor:'pointer'}} onClick={() => setShowPrivacy(true)}>Privacy Policy</button>
               </label>
             </div>
-            <button className="mt-2 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-base md:text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30 w-full" type="submit" disabled={success || loading}>
+            <button className="mt-2 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-base md:text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30 w-full" type="submit" disabled={success || loading || !agreedTerms}>
               {loading ? "Signing up..." : "Sign up"}
             </button>
           </form>
@@ -179,6 +192,12 @@ export default function Signup() {
           <motion.div className="absolute right-2 bottom-2 text-[#B6A6CA] text-xs md:text-lg opacity-60" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>✧</motion.div>
         </div>
       </div>
+      <LegalModal open={showTerms} onClose={() => setShowTerms(false)} title="Terms of Service">
+        <Terms />
+      </LegalModal>
+      <LegalModal open={showPrivacy} onClose={() => setShowPrivacy(false)} title="Privacy Policy">
+        <PrivacyPolicy />
+      </LegalModal>
       <style>{`
         @keyframes gradientBG {
           0% { background-position: 0% 50%; }

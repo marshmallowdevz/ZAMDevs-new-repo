@@ -53,6 +53,10 @@ export default function Settings() {
     );
   }
 
+  function setShowLogoutModal(arg0: boolean): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <>
       <Head>
@@ -105,7 +109,7 @@ export default function Settings() {
                 </button>
               </Link>
               <button
-                onClick={handleLogout}
+                onClick={() => setShowLogoutModal(true)}
                 className="w-full px-6 py-3 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300"
               >
                 🚪 Log Out

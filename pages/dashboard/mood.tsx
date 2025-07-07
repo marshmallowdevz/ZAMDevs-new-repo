@@ -28,7 +28,7 @@ export default function MoodTracker() {
     created_at: string;
     user_id?: string;
   };
-  
+
   const [moodData, setMoodData] = useState<Mood[]>([]);
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(true);
@@ -37,7 +37,6 @@ export default function MoodTracker() {
 
   useEffect(() => {
     fetchMoodData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchMoodData() {

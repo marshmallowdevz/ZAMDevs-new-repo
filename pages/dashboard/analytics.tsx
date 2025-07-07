@@ -1,3 +1,5 @@
+// 📄 /pages/dashboard/analytics.tsx
+
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import Sidebar from "../../components/Sidebar";

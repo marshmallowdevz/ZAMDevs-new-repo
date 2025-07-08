@@ -35,6 +35,9 @@ export default function MoodTracker() {
   const router = useRouter();
   const { darkMode } = useDarkMode();
 
+  // Change this variable to switch between horizontal and vertical layouts
+  const layoutDirection = "flex-row gap-12"; // use "flex-col gap-8" for vertical
+
   useEffect(() => {
     fetchMoodData();
   }, []);
@@ -92,7 +95,7 @@ export default function MoodTracker() {
           <div className="max-w-7xl mx-auto">
             <h2 className={`text-4xl font-bold mb-10 ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>🌈 Mood Tracker</h2>
             <div className="w-full flex justify-center items-stretch">
-              <div className={`w-full flex flex-row gap-12 bg-white/80 dark:bg-[#23234a] rounded-3xl shadow-lg border border-white/30 dark:border-[#23234a] p-12 min-h-[500px]`}>
+              <div className={`w-full flex ${layoutDirection} bg-white/80 dark:bg-[#23234a] rounded-3xl shadow-lg border border-white/30 dark:border-[#23234a] p-12 min-h-[500px]`}>
                 {/* Emoji Picker (left) */}
                 <div className="flex flex-col flex-1 justify-between">
                   <h3 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>How are you feeling today?</h3>
@@ -126,7 +129,7 @@ export default function MoodTracker() {
                   </button>
                 </div>
                 {/* Mood History (right) */}
-                <div className="flex flex-col flex-1 ml-12">
+                <div className={`flex flex-col flex-1 ${layoutDirection === "flex-row gap-12" ? "ml-12" : "mt-8"}`}>
                   <h3 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>Mood History</h3>
                   <div className="flex-1 flex flex-col justify-start">
                     {moodData.length === 0 ? (

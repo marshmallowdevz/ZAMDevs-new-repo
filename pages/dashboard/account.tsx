@@ -36,6 +36,16 @@ const [editMode, setEditMode] = useState(false);
 const [newAvatarFile, setNewAvatarFile] = useState<File | null>(null);
 const [newHeaderFile, setNewHeaderFile] = useState<File | null>(null);
 const [profileError, setProfileError] = useState<string | null>(null);
+// Add state for social links
+const [socialLinks, setSocialLinks] = useState({
+  facebook: '',
+  instagram: '',
+  twitter: '',
+  github: '',
+  reflectly: ''
+});
+// Add state for delete modal
+const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 useEffect(() => {
 setTimeout(() => setShowText(true), 100);
@@ -102,6 +112,7 @@ return;
 }
 if (data) {
 const { data: publicUrl } = supabase.storage.from('headers').getPublicUrl(data.path);
+
 headerUrl = publicUrl.publicUrl;
 }
 }
@@ -134,6 +145,20 @@ setNewHeaderFile(null);
 // Optionally, refetch profile to reset fields
 }
 
+  // Handler for Delete Account (placeholder)
+  const handleDeleteAccount = () => {
+    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      // TODO: Add backend logic for account deletion
+      alert("Account deletion is not implemented yet.");
+    }
+  };
+
+  // Handler for Change Password (placeholder)
+  const handleChangePassword = () => {
+    // TODO: Add backend logic for password change
+    alert("Change password is not implemented yet.");
+  };
+
 return (
 <div className={`relative min-h-screen w-full flex animate-gradient-bg overflow-hidden ${darkMode ? 'bg-[#1a1a2e]' : ''}`}>
 <Head>
@@ -161,198 +186,199 @@ return (
 <div className="absolute left-1/4 bottom-1/4 text-[#fff] text-lg opacity-40 z-0 animate-twinkle" style={{ animationDelay: "1s" }}>✦</div>
 <div className="absolute left-1/2 top-1/6 text-[#fff] text-lg opacity-60 z-0 animate-twinkle" style={{ animationDelay: "2s" }}>✦</div>
 {/* Main Content */}
-<main className={`flex-1 ${collapsed ? 'mx-auto' : 'ml-64'} flex items-center justify-center p-6 min-h-screen`}>
-<div className={`relative z-20 w-full max-w-2xl mx-auto px-0 py-0 ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white/10'} rounded-3xl shadow-2xl backdrop-blur-md transition-all duration-700 ${showText && showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-{/* Header Banner */}
-<div className="relative h-56 w-full bg-gradient-to-r from-[#A09ABC]/40 to-[#B6A6CA]/40 rounded-t-3xl overflow-hidden flex items-center justify-center">
-<Image
-src={newHeaderFile ? URL.createObjectURL(newHeaderFile) : header}
-alt="Header"
-fill
-style={{ objectFit: "cover" }}
-className="rounded-t-3xl"
-onError={(e) => (e.currentTarget.src = "/default-header.png")}
-/>
-{editMode && (
-<label className="absolute top-4 right-6 flex items-center gap-2 cursor-pointer bg-white/80 hover:bg-white/90 px-4 py-2 rounded-full shadow transition-all">
-<FaCamera className="text-[#A09ABC] text-lg" />
-<span className="font-medium text-[#6C63A6] text-sm">Change Header</span>
-<input
-type="file"
-accept="image/*"
-className="hidden"
-onChange={e => setNewHeaderFile(e.target.files?.[0] || null)}
-/>
-</label>
-)}
-{editMode && (
-<div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none rounded-t-3xl" />
-)}
-{editMode && (
-  <div className="absolute top-4 left-6 flex flex-col gap-2 z-20">
-    <button
-      type="button"
-      className="bg-white/80 hover:bg-red-200 text-red-600 px-4 py-1 rounded-full shadow text-xs font-semibold transition-all"
-      onClick={() => {
-        setNewHeaderFile(null);
-        setHeader('/default-header.jpg');
-      }}
-    >
-      Remove Header
-    </button>
+<main className={`flex min-h-screen w-full items-center justify-center ${darkMode ? 'bg-gradient-to-br from-[#1a1a2e] via-[#23234a] to-[#23234a]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#B6A6CA] to-[#B6A6CA]'} ${darkMode ? 'dark' : ''}`}>
+  <div className={`max-w-xl w-full rounded-3xl shadow-2xl p-12 flex flex-col items-center justify-center relative mx-auto transition-colors duration-300 ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-gradient-to-b from-orange-100 to-purple-200 text-gray-800'}`}>
+    {/* Header Banner */}
+    <div className="w-full h-56 rounded-t-3xl overflow-hidden relative flex items-center justify-center">
+      <Image
+        src={newHeaderFile ? URL.createObjectURL(newHeaderFile) : header}
+        alt="Header"
+        fill
+        style={{ objectFit: "cover" }}
+        className="rounded-t-3xl"
+        onError={(e) => (e.currentTarget.src = "/default-header.jpg")}
+      />
+      {editMode && (
+        <>
+          <label className="absolute top-3 right-4 flex items-center gap-2 cursor-pointer bg-white/80 hover:bg-white/90 px-4 py-2 rounded-full shadow transition-all">
+            <span className="font-medium text-[#6C63A6] text-xs">Change Header</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={e => setNewHeaderFile(e.target.files?.[0] || null)}
+            />
+          </label>
+          <button
+            type="button"
+            className="absolute top-3 left-4 bg-white/80 hover:bg-red-200 text-red-600 px-4 py-2 rounded-full shadow text-xs font-semibold transition-all"
+            onClick={() => {
+              setNewHeaderFile(null);
+              setHeader('/default-header.jpg');
+            }}
+          >
+            Remove Header
+          </button>
+        </>
+      )}
+    </div>
+    {/* Edit Profile Button */}
+    {!editMode && (
+      <button
+        onClick={() => setEditMode(true)}
+        className={`absolute top-6 right-6 px-5 py-2 rounded-full font-semibold shadow hover:bg-white text-base transition-colors duration-300 ${darkMode ? 'bg-[#23234a] text-[#A09ABC] hover:bg-[#23234a]/80' : 'bg-white/80 text-gray-700'}`}
+      >
+        Edit Profile
+      </button>
+    )}
+    {/* Avatar */}
+    <div className={`w-36 h-36 rounded-full shadow-lg flex items-center justify-center mb-8 -mt-16 overflow-hidden relative z-10 border-4 border-white ${darkMode ? 'bg-[#1a1a2e] border-[#23234a]' : 'bg-white border-white'}`}>
+      <Image
+        src={newAvatarFile ? URL.createObjectURL(newAvatarFile) : avatar}
+        alt="Avatar"
+        width={144}
+        height={144}
+        style={{ objectFit: "cover" }}
+        onError={(e) => (e.currentTarget.src = "/default-avatar.png")}
+      />
+      {editMode && (
+        <>
+          <label className={`absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 cursor-pointer px-3 py-2 rounded-full shadow transition-all border border-[#A09ABC]/30 ${darkMode ? 'bg-[#23234a] text-[#A09ABC] hover:bg-[#23234a]/80' : 'bg-white/90 text-[#6C63A6] hover:bg-white'}`}>
+            <span className="font-medium text-xs">Change</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={e => setNewAvatarFile(e.target.files?.[0] || null)}
+            />
+          </label>
+          <button
+            type="button"
+            className={`absolute top-2 right-2 px-3 py-1 rounded-full shadow text-xs font-semibold transition-all z-20 ${darkMode ? 'bg-[#23234a] text-red-400 hover:bg-red-900' : 'bg-white/80 text-red-600 hover:bg-red-200'}`}
+            onClick={() => {
+              setNewAvatarFile(null);
+              setAvatar('/default-avatar.png');
+            }}
+          >
+            Remove
+          </button>
+        </>
+      )}
+    </div>
+    {/* Name, Email, Phone */}
+    {editMode ? (
+      <>
+        <input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          className={`text-3xl font-bold mb-3 text-center w-full rounded px-3 py-2 border border-[#A09ABC]/30 focus:outline-none ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'text-gray-800'}`}
+        />
+        <input
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          className={`text-lg text-center mb-2 w-full rounded px-3 py-2 border border-[#A09ABC]/30 focus:outline-none ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'text-gray-600'}`}
+        />
+        <input
+          value={phone}
+          onChange={e => setPhone(e.target.value)}
+          className={`text-base text-center mb-5 w-full rounded px-3 py-2 border border-[#A09ABC]/30 focus:outline-none ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'text-gray-500'}`}
+        />
+      </>
+    ) : (
+      <>
+        <div className="text-3xl font-bold mb-3 text-center">{name}</div>
+        <div className="text-lg text-center mb-2">{email}</div>
+        <div className="text-base text-center mb-5">{phone}</div>
+      </>
+    )}
+    {/* Bio/Quote */}
+    {editMode ? (
+      <textarea
+        value={bio}
+        onChange={e => setBio(e.target.value)}
+        className={`rounded-xl px-5 py-3 text-center italic text-base mb-8 w-full max-w-xs mx-auto shadow focus:outline-none border border-[#A09ABC]/30 ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-orange-100/80 text-gray-700'}`}
+        rows={2}
+      />
+    ) : (
+      <div className={`rounded-xl px-5 py-3 text-center italic text-base mb-8 w-full max-w-xs mx-auto shadow ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-orange-100/80 text-gray-700'}`}>{bio}</div>
+    )}
+    {/* Social Links */}
+    <div className="w-full flex flex-col items-center mb-8">
+      <div className={`text-lg font-bold mb-4 ${darkMode ? 'text-[#A09ABC]' : 'text-gray-700'}`}>Social Links</div>
+      {editMode ? (
+        <div className="flex flex-col gap-3 w-full max-w-xs mx-auto mb-4">
+          <input type="text" placeholder="Facebook URL" value={socialLinks.facebook} onChange={e => setSocialLinks({ ...socialLinks, facebook: e.target.value })} className={`rounded px-3 py-2 border border-[#A09ABC]/30 focus:outline-none ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : ''}`} />
+          <input type="text" placeholder="Instagram URL" value={socialLinks.instagram} onChange={e => setSocialLinks({ ...socialLinks, instagram: e.target.value })} className={`rounded px-3 py-2 border border-[#A09ABC]/30 focus:outline-none ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : ''}`} />
+          <input type="text" placeholder="Twitter URL" value={socialLinks.twitter} onChange={e => setSocialLinks({ ...socialLinks, twitter: e.target.value })} className={`rounded px-3 py-2 border border-[#A09ABC]/30 focus:outline-none ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : ''}`} />
+          <input type="text" placeholder="GitHub URL" value={socialLinks.github} onChange={e => setSocialLinks({ ...socialLinks, github: e.target.value })} className={`rounded px-3 py-2 border border-[#A09ABC]/30 focus:outline-none ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : ''}`} />
+          <input type="text" placeholder="Reflectly URL" value={socialLinks.reflectly} onChange={e => setSocialLinks({ ...socialLinks, reflectly: e.target.value })} className={`rounded px-3 py-2 border border-[#A09ABC]/30 focus:outline-none ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : ''}`} />
+        </div>
+      ) : null}
+      <div className="flex flex-row gap-6 justify-center">
+        <a href={socialLinks.facebook || '#'} title="Facebook" target="_blank" rel="noopener noreferrer" className={`hover:scale-110 transition${!socialLinks.facebook ? ' opacity-40 pointer-events-none' : ''}`}> <img src="/pictures/facebook.png" alt="Facebook" className="w-9 h-9 rounded-full shadow-md object-cover" /> </a>
+        <a href={socialLinks.instagram || '#'} title="Instagram" target="_blank" rel="noopener noreferrer" className={`hover:scale-110 transition${!socialLinks.instagram ? ' opacity-40 pointer-events-none' : ''}`}> <img src="/pictures/instagram.png" alt="Instagram" className="w-9 h-9 rounded-full shadow-md object-cover" /> </a>
+        <a href={socialLinks.reflectly || '#'} title="Reflectly" target="_blank" rel="noopener noreferrer" className={`hover:scale-110 transition${!socialLinks.reflectly ? ' opacity-40 pointer-events-none' : ''}`}> <img src="/pictures/reflectly.png" alt="Reflectly" className="w-9 h-9 rounded-full shadow-md object-cover" /> </a>
+        <a href={socialLinks.github || '#'} title="GitHub" target="_blank" rel="noopener noreferrer" className={`hover:scale-110 transition${!socialLinks.github ? ' opacity-40 pointer-events-none' : ''}`}> <img src="/pictures/github.png" alt="GitHub" className="w-9 h-9 rounded-full shadow-md object-cover bg-white p-1" /> </a>
+        <a href={socialLinks.twitter || '#'} title="Twitter" target="_blank" rel="noopener noreferrer" className={`hover:scale-110 transition${!socialLinks.twitter ? ' opacity-40 pointer-events-none' : ''}`}> <img src="/pictures/twitter.png" alt="Twitter" className="w-9 h-9 rounded-full shadow-md object-cover" /> </a>
+      </div>
+    </div>
+    {/* Save/Cancel Buttons in Edit Mode */}
+    {editMode && (
+      <div className="flex gap-4 mt-4">
+        <button
+          onClick={() => setEditMode(false)}
+          className={`px-6 py-2 rounded-full font-bold shadow transition-all duration-300 ${darkMode ? 'bg-[#23234a] text-[#A09ABC] hover:bg-[#23234a]/80' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => setEditMode(false)}
+          className={`px-6 py-2 rounded-full font-bold shadow transition-all duration-300 ${darkMode ? 'bg-gradient-to-r from-[#A09ABC] to-[#6C63A6] text-white hover:from-[#6C63A6] hover:to-[#A09ABC]' : 'bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white hover:from-[#B6A6CA] hover:to-[#A09ABC]'}`}
+        >
+          Save
+        </button>
+      </div>
+    )}
+    {/* Delete Account Section */}
+    <div className="w-full flex flex-col items-center border-t border-gray-300 pt-6 mt-2">
+      <button
+        onClick={() => setShowDeleteModal(true)}
+        className={`px-7 py-3 rounded-full font-bold shadow transition text-base mb-2 ${darkMode ? 'bg-gradient-to-r from-red-700 to-red-900 text-white hover:from-red-900 hover:to-red-700' : 'bg-gradient-to-r from-red-400 to-red-600 text-white hover:from-red-600 hover:to-red-400'}`}
+      >
+        Delete My Account
+      </button>
+    </div>
+    {/* Delete Account Modal */}
+    {showDeleteModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+        <div className={`rounded-2xl shadow-2xl p-8 max-w-xs w-full flex flex-col items-center relative ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white'}` }>
+          <button
+            className={`absolute top-3 right-4 text-2xl focus:outline-none ${darkMode ? 'text-[#A09ABC] hover:text-[#6C63A6]' : 'text-[#A09ABC] hover:text-[#6C63A6]'}`}
+            onClick={() => setShowDeleteModal(false)}
+            aria-label="Close"
+          >
+            &times;
+          </button>
+          <div className="text-xl font-bold mb-2">Confirm Delete</div>
+          <div className="mb-6 text-center">Are you sure you want to delete your account?<br/>This action cannot be undone.</div>
+          <div className="flex gap-4 w-full justify-center">
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              className={`px-6 py-2 rounded-lg font-bold shadow w-1/2 ${darkMode ? 'bg-[#23234a] text-[#A09ABC] hover:bg-[#23234a]/80' : 'bg-gray-200 text-[#6C63A6] hover:bg-gray-300'}`}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => { setShowDeleteModal(false); handleDeleteAccount(); }}
+              className={`px-6 py-2 rounded-lg font-bold shadow w-1/2 ${darkMode ? 'bg-gradient-to-r from-red-700 to-red-900 text-white hover:from-red-900 hover:to-red-700' : 'bg-gradient-to-r from-red-400 to-red-600 text-white hover:from-red-600 hover:to-red-400'}`}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
-)}
-</div>
-{/* Profile Picture and Info Row */}
-<div className="relative flex flex-row items-end justify-between px-8 -mt-16">
-{/* Avatar */}
-<div className="relative border-8 border-white rounded-full w-36 h-36 bg-white shadow flex items-center justify-center overflow-hidden">
-<Image
-src={newAvatarFile ? URL.createObjectURL(newAvatarFile) : avatar}
-alt="Avatar"
-width={144}
-height={144}
-style={{ objectFit: "cover" }}
-onError={(e) => (e.currentTarget.src = "/default-avatar.png")}
-/>
-{editMode && (
-<label className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 cursor-pointer bg-white/90 hover:bg-white px-3 py-2 rounded-full shadow transition-all border border-[#A09ABC]/30">
-<FaCamera className="text-[#A09ABC] text-base" />
-<span className="font-medium text-[#6C63A6] text-xs">Change</span>
-<input
-type="file"
-accept="image/*"
-className="hidden"
-onChange={e => setNewAvatarFile(e.target.files?.[0] || null)}
-/>
-</label>
-)}
-{editMode && (
-<div className="absolute inset-0 bg-black/10 rounded-full pointer-events-none" />
-)}
-{editMode && (
-  <button
-    type="button"
-    className="absolute top-2 right-2 bg-white/80 hover:bg-red-200 text-red-600 px-3 py-1 rounded-full shadow text-xs font-semibold transition-all z-20"
-    onClick={() => {
-      setNewAvatarFile(null);
-      setAvatar('/default-avatar.png');
-    }}
-  >
-    Remove
-  </button>
-)}
-</div>
-{/* Edit/Save/Cancel Buttons */}
-<div className="mb-8 flex flex-col gap-2 items-end">
-{profileSuccess && (
-<div className="text-green-600 bg-white/80 border border-green-300 rounded-lg p-2 mb-2 text-center shadow">
-Profile updated successfully!
-</div>
-)}
-{profileError && (
-<div className="text-red-600 bg-white/80 border border-red-300 rounded-lg p-2 mb-2 text-center shadow max-w-xs">
-{profileError}
-</div>
-)}
-{!editMode ? (
-<button
-onClick={() => setEditMode(true)}
-className="px-8 py-3 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30"
-style={{ minWidth: 140 }}
->
-Edit Profile
-</button>
-) : (
-<div className="flex gap-2 mt-4">
-<button
-onClick={handleProfileSave}
-className="px-8 py-3 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30"
-disabled={profileLoading}
-style={{ minWidth: 140 }}
->
-{profileLoading ? "Saving..." : "Save"}
-</button>
-<button
-onClick={handleCancelEdit}
-className="px-8 py-3 rounded-full bg-gray-200 text-[#6C63A6] font-bold text-lg shadow hover:bg-gray-300 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30"
-disabled={profileLoading}
-style={{ minWidth: 140 }}
->
-Cancel
-</button>
-</div>
-)}
-</div>
-</div>
-{/* Profile Info */}
-<div className="mt-6 flex flex-col items-center px-8">
-{editMode ? (
-<input
-value={name}
-onChange={e => setName(e.target.value)}
-className={`text-2xl md:text-3xl font-serif font-bold bg-white/80 border border-[#A09ABC]/30 w-full text-center mb-2 ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'} drop-shadow focus:outline-none`}
-/>
-) : (
-<input
-value={name}
-readOnly
-className={`text-2xl md:text-3xl font-serif font-bold bg-transparent border-none w-full text-center mb-2 ${darkMode ? 'text-[#A09ABC]' : 'text-[#ede9fe]'} drop-shadow focus:outline-none`}
-/>
-)}
-<div className={`mb-2 text-center text-lg font-semibold drop-shadow ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}>{email}</div>
-{editMode ? (
-<input
-value={phone}
-onChange={e => setPhone(e.target.value)}
-className={`mb-2 text-center text-base font-medium bg-white/80 border border-[#A09ABC]/30 w-full focus:outline-none ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}
-placeholder="Phone number"
-/>
-) : (
-<input
-value={phone}
-readOnly
-className={`mb-2 text-center text-base font-medium bg-transparent border-none w-full focus:outline-none ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}
-placeholder="Phone number"
-/>
-)}
-{editMode ? (
-<textarea
-value={bio}
-onChange={e => setBio(e.target.value)}
-className={`bg-white/80 border border-[#A09ABC]/30 w-full text-center mb-4 font-medium focus:outline-none ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}
-rows={2}
-/>
-) : (
-<textarea
-value={bio}
-readOnly
-className={`bg-transparent border-none w-full text-center mb-4 font-medium focus:outline-none ${darkMode ? 'text-[#A09ABC]' : 'text-[#6C63A6]'}`}
-rows={2}
-/>
-)}
-</div>
-{/* Journal Entries */}
-<div className="mt-12">
-            <h3 className={`text-xl md:text-2xl font-serif font-bold mb-4 drop-shadow mx-6 my-4 ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>Your Journal Entries</h3>
-<div className="space-y-4">
-{journalEntries.length === 0 && (
-  <div>
-    <div className={`${darkMode ? 'text-[#A09ABC]' : 'text-[#B6A6CA]'} text-center mx-6 my-4`}>No journal entries yet.</div>
-  </div>
-)}
-{journalEntries.map((entry: JournalEntry) => (
-<div key={entry.id} className={`${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white/70 text-[#6C63A6]'} rounded-xl p-4 shadow flex flex-col border ${darkMode ? 'border-[#23234a]' : 'border-white/30'}`}>
-<div className={`text-sm mb-1 ${darkMode ? 'text-[#B6A6CA]' : 'text-[#A09ABC]'}`}>
-{new Date(entry.created_at).toLocaleString()}
-</div>
-<div className="font-semibold">{entry.title}</div>
-<div>{entry.content}</div>
-</div>
-))}
-</div>
-</div>
-</div>
 </main>
 </div>
 );

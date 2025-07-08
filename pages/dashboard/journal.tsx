@@ -29,7 +29,16 @@ export default function Journal() {
   const [isPublic, setIsPublic] = useState(true);
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const router = useRouter();
-  const moodOptions = ["😊", "😌", "😥", "🥰", "😪"];
+  const moodOptions = ["😐", "😊", "😌", "😥", "🥰", "😪"];
+  // Map mood emoji to their names
+  // const moodNameMap: { [key: string]: string } = {
+  //   "😐": "Neutral",
+  //   "😊": "Happy",
+  //   "😌": "Calm",
+  //   "😥": "Sad",
+  //   "🥰": "Loved",
+  //   "😪": "Tired",
+  // };
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
@@ -82,7 +91,7 @@ export default function Journal() {
       // Update existing entry
       const { data, error } = await supabase
         .from("journal")
-        .update({ content: newEntry, public: isPublic })
+        .update({ content: newEntry, public: isPublic, updated_at: new Date().toISOString(), title: entryTitle, mood: selectedMood || undefined })
         .eq("id", editingEntry.id)
         .select();
       if (!error && data) {
@@ -163,8 +172,10 @@ export default function Journal() {
     width: 44, height: 24, borderRadius: 12, background: isPublic ? 'linear-gradient(90deg, #A09ABC 0%, #B6A6CA 100%)' : '#e5e7eb', position: 'relative' as const, cursor: 'pointer', transition: 'background 0.3s', display: 'inline-block', verticalAlign: 'middle'
   };
   const switchInner = {
-    position: 'absolute' as const, top: 2, left: isPublic ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px #D5CFE1', transition: 'left 0.3s'
-  };
+    position: 'absolute', top: 2, left: isPublic ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px #D5CFE1', transition: 'left 0.3s'
+  } as const;
+
+  // Add a mapping from emoji to mood name
 
   if (loading) {
     return (

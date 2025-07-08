@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { FaHome, FaBook, FaSmile, FaTasks, FaChartBar, FaCog, FaUser, FaBars } from "react-icons/fa";
+import { FaHome, FaBook, FaSmile, FaTasks, FaChartBar, FaCog, FaUser, FaBars, FaRss } from "react-icons/fa";
 import Image from "next/image";
 import { useDarkMode } from "./DarkModeContext";
 const menuItems = [
   { label: "Dashboard", path: "/dashboard", icon: <FaHome /> },
   { label: "Journal", path: "/dashboard/journal", icon: <FaBook /> },
-  { label: "Mood Tracker", path: "/dashboard/mood", icon: <FaSmile /> }     ,
+  { label: "Mood Tracker", path: "/dashboard/mood", icon: <FaSmile /> },
   { label: "Task", path: "/dashboard/task", icon: <FaTasks /> },
   { label: "Analytics", path: "/dashboard/analytics", icon: <FaChartBar /> },
+  { label: "Community Feed", path: "/feed", icon: <FaRss /> },
   { label: "Settings", path: "/dashboard/settings", icon: <FaCog /> },
   { label: "Account", path: "/dashboard/account", icon: <FaUser /> },
 ];

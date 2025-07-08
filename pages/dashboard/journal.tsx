@@ -11,9 +11,9 @@ type JournalEntry = {
   content: string;
   user_id: string;
   created_at: string;
+  updated_at?: string;
   public?: boolean;
   title?: string;
-  mood?: string;
 };
 
 export default function Journal() {
@@ -30,6 +30,15 @@ export default function Journal() {
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const router = useRouter();
   const moodOptions = ["😐", "😊", "😌", "😥", "🥰", "😪"];
+  // Map mood emoji to their names
+  // const moodNameMap: { [key: string]: string } = {
+  //   "😐": "Neutral",
+  //   "😊": "Happy",
+  //   "😌": "Calm",
+  //   "😥": "Sad",
+  //   "🥰": "Loved",
+  //   "😪": "Tired",
+  // };
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
@@ -67,7 +76,6 @@ export default function Journal() {
     setEditingEntry(entry);
     setNewEntry(entry.content);
     setEntryTitle(entry.title || "");
-    setSelectedMood(entry.mood || null);
     setIsPublic(!!entry.public);
     setModalOpen(true);
   };
@@ -83,15 +91,14 @@ export default function Journal() {
       // Update existing entry
       const { data, error } = await supabase
         .from("journal")
-        .update({ content: newEntry, public: isPublic, title: entryTitle, mood: selectedMood || undefined })
+        .update({ content: newEntry, public: isPublic, updated_at: new Date().toISOString(), title: entryTitle, mood: selectedMood || undefined })
         .eq("id", editingEntry.id)
         .select();
       if (!error && data) {
-        setEntries(entries.map(e => e.id === editingEntry.id ? { ...e, content: newEntry, public: isPublic, title: entryTitle, mood: selectedMood || undefined } : e));
+        setEntries(entries.map(e => e.id === editingEntry.id ? { ...e, content: newEntry, public: isPublic, updated_at: data[0].updated_at } : e));
         setEditingEntry(null);
         setNewEntry("");
         setEntryTitle("");
-        setSelectedMood(null);
         setIsPublic(true);
         setModalOpen(false);
       }
@@ -99,13 +106,12 @@ export default function Journal() {
       // Add new entry
       const { data, error } = await supabase
         .from("journal")
-        .insert([{ content: newEntry, user_id: session.user.id, public: isPublic, title: entryTitle, mood: selectedMood || undefined }])
+        .insert([{ content: newEntry, user_id: session.user.id, public: isPublic }])
         .select();
       if (!error && data) {
-        setEntries([{ ...data[0], mood: data[0].mood ?? undefined }, ...entries]);
+        setEntries([data[0], ...entries]);
         setNewEntry("");
         setEntryTitle("");
-        setSelectedMood(null);
         setIsPublic(true);
         setModalOpen(false);
       }
@@ -163,21 +169,13 @@ export default function Journal() {
     color: '#6C63A6', fontWeight: 500, fontSize: 16
   };
   const switchOuter = {
-    width: 44, height: 24, borderRadius: 12, background: isPublic ? 'linear-gradient(90deg, #A09ABC 0%, #B6A6CA 100%)' : '#e5e7eb', position: 'relative' as 'relative', cursor: 'pointer', transition: 'background 0.3s', display: 'inline-block', verticalAlign: 'middle'
+    width: 44, height: 24, borderRadius: 12, background: isPublic ? 'linear-gradient(90deg, #A09ABC 0%, #B6A6CA 100%)' : '#e5e7eb', position: 'relative' as const, cursor: 'pointer', transition: 'background 0.3s', display: 'inline-block', verticalAlign: 'middle'
   };
   const switchInner = {
-    position: 'absolute' as 'absolute', top: 2, left: isPublic ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px #D5CFE1', transition: 'left 0.3s'
-  };
+    position: 'absolute', top: 2, left: isPublic ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px #D5CFE1', transition: 'left 0.3s'
+  } as const;
 
   // Add a mapping from emoji to mood name
-  const moodNameMap: Record<string, string> = {
-    '😐': 'Natural',
-    '😊': 'Happy',
-    '😌': 'Calm',
-    '😥': 'Sad',
-    '🥰': 'Loved',
-    '😪': 'Tired',
-  };
 
   if (loading) {
     return (
@@ -229,9 +227,8 @@ export default function Journal() {
                       key={mood}
                       style={{ fontSize: 28, cursor: 'pointer', filter: selectedMood === mood ? 'drop-shadow(0 0 4px #7c3aed)' : 'none', opacity: selectedMood === mood ? 1 : 0.6 }}
                       onClick={() => setSelectedMood(mood)}
-                      title={moodNameMap[mood]}
                     >
-                      {mood} <span style={{fontSize: 14, marginLeft: 4}}>{moodNameMap[mood]}</span>
+                      {mood}
                     </span>
                   ))}
                 </div>
@@ -278,41 +275,6 @@ export default function Journal() {
                 {editingEntry ? 'Save Changes' : 'Save Entry'}
               </button>
             </Modal>
-            {/* Emoji Modal */}
-            <Modal isOpen={emojiModalOpen} onClose={() => setEmojiModalOpen(false)} title="Pick an Emoji" style={{ minWidth: 400, maxWidth: 500, background: darkMode ? '#23234a' : undefined }} noBlur={true}>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-                {emojiCategories.map(cat => (
-                  <button
-                    key={cat.name}
-                    onClick={() => setActiveEmojiCategory(cat.name)}
-                    style={{
-                      background: activeEmojiCategory === cat.name ? '#A09ABC' : (darkMode ? '#23234a' : '#f8f6fa'),
-                      color: activeEmojiCategory === cat.name ? '#fff' : '#A09ABC',
-                      border: 'none',
-                      borderRadius: 6,
-                      padding: '6px 14px',
-                      fontWeight: 600,
-                      fontSize: 16,
-                      cursor: 'pointer',
-                      boxShadow: activeEmojiCategory === cat.name ? '0 2px 8px #D5CFE1' : 'none',
-                    }}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
-              <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {emojiCategories.find(cat => cat.name === activeEmojiCategory)?.emojis.map(emoji => (
-                  <span
-                    key={emoji}
-                    style={{ fontSize: 28, cursor: 'pointer' }}
-                    onClick={() => insertEmoji(emoji)}
-                  >
-                    {emoji}
-                  </span>
-                ))}
-              </div>
-            </Modal>
             {entries.length === 0 ? (
               <div className={`${darkMode ? 'text-[#A09ABC] bg-[#23234a]' : 'text-[#6C63A6] bg-white/60'} text-center p-8 rounded-xl backdrop-blur-md border ${darkMode ? 'border-[#23234a]' : 'border-white/30'}`}>
                 No entries yet. Start writing above! ✍️
@@ -322,17 +284,13 @@ export default function Journal() {
                 {entries.map((entry, idx) => (
                   <div key={entry.id} className={`${darkMode ? 'bg-[#23234a] text-[#A09ABC] border-[#23234a]' : 'bg-white/70 text-[#6C63A6] border-white/30'} rounded-xl p-6 shadow border backdrop-blur-md relative`}>
                     <div className="flex justify-between items-center mb-3">
-                      <div style={{ fontWeight: 700, fontSize: 20, color: darkMode ? '#A09ABC' : '#7c3aed', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ fontWeight: 700, fontSize: 20, color: darkMode ? '#A09ABC' : '#7c3aed' }}>
                         {entry.title && entry.title.trim() !== '' ? entry.title : `Entry #${entries.length - idx}`}
-                        {entry.mood && (
-                          <span style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 12 }}>
-                            <span style={{ fontSize: 24 }}>{entry.mood}</span>
-                            <span style={{ fontSize: 14, color: darkMode ? '#B6A6CA' : '#6C63A6', fontWeight: 500 }}>{moodNameMap[entry.mood] || 'Mood'}</span>
-                          </span>
-                        )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span>{new Date(entry.created_at).toLocaleString()}</span>
+                        <span>
+                          {new Date(entry.updated_at || entry.created_at).toLocaleString()}
+                        </span>
                         {entry.public && <span className="bg-[#A09ABC] text-white px-2 py-1 rounded-full text-xs">🌍 Public</span>}
                         {!entry.public && <span className="bg-gray-300 text-[#6C63A6] px-2 py-1 rounded-full text-xs">🔒 Private</span>}
                         <button
@@ -359,6 +317,41 @@ export default function Journal() {
           </div>
         </main>
       </div>
+      {/* Emoji Picker Modal rendered as a sibling, not a child of the main modal */}
+      <Modal isOpen={emojiModalOpen} onClose={() => setEmojiModalOpen(false)} title="Pick an Emoji" style={{ minWidth: 400, maxWidth: 500, background: darkMode ? '#23234a' : undefined }} noBlur={true}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+          {emojiCategories.map(cat => (
+            <button
+              key={cat.name}
+              onClick={() => setActiveEmojiCategory(cat.name)}
+              style={{
+                background: activeEmojiCategory === cat.name ? '#A09ABC' : (darkMode ? '#23234a' : '#f8f6fa'),
+                color: activeEmojiCategory === cat.name ? '#fff' : '#A09ABC',
+                border: 'none',
+                borderRadius: 6,
+                padding: '6px 14px',
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: 'pointer',
+                boxShadow: activeEmojiCategory === cat.name ? '0 2px 8px #D5CFE1' : 'none',
+              }}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+        <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {emojiCategories.find(cat => cat.name === activeEmojiCategory)?.emojis.map(emoji => (
+            <span
+              key={emoji}
+              style={{ fontSize: 28, cursor: 'pointer' }}
+              onClick={() => insertEmoji(emoji)}
+            >
+              {emoji}
+            </span>
+          ))}
+        </div>
+      </Modal>
     </>
   );
 }

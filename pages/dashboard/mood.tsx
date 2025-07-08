@@ -20,8 +20,32 @@ const moods = [
   ["😤", "😳", "🥳", "😎", "🥺"]
 ];
 
+const moodAdvice: { [emoji: string]: string } = {
+  "😄": "Keep spreading your happiness! Maybe share a compliment with someone today.",
+  "🙂": "Enjoy your day! Try doing something creative.",
+  "😐": "Try a short walk or listen to your favorite music.",
+  "😔": "Take a deep breath. Write down three things you're grateful for.",
+  "😢": "It's okay to feel sad. Call or message a friend you trust.",
+  "😡": "Try some deep breathing or take a break outside.",
+  "😱": "Pause and do a 5-minute mindfulness exercise.",
+  "😴": "Rest is important. Take a short nap if you can.",
+  "🤩": "Channel your excitement into a fun project!",
+  "😇": "Do a random act of kindness today.",
+  "😂": "Share a funny story or meme with a friend.",
+  "🥲": "Reflect on your feelings in a journal.",
+  "😏": "Stay confident, but check in with someone close to you.",
+  "😬": "Remember, awkward moments pass. Treat yourself kindly.",
+  "😭": "Let it out. Maybe write about your feelings or talk to someone.",
+  "😤": "Use your energy for a quick workout or creative task.",
+  "😳": "Be gentle with yourself. Everyone makes mistakes.",
+  "🥳": "Celebrate your achievements, big or small!",
+  "😎": "Keep being awesome! Help someone out today.",
+  "🥺": "Reach out if you need support. You're not alone.",
+};
+
 export default function MoodTracker() {
   const [selectedMood, setSelectedMood] = useState("");
+  const [showAdvice, setShowAdvice] = useState(false);
   type Mood = {
     id: string;
     emoji: string;
@@ -66,6 +90,7 @@ export default function MoodTracker() {
       return;
     }
     await supabase.from("moods").insert([{ user_id: user.id, emoji: selectedMood }]);
+    setShowAdvice(true);
     setSelectedMood("");
     fetchMoodData();
   }
@@ -127,6 +152,12 @@ export default function MoodTracker() {
                   >
                     Save Mood
                   </button>
+                  {/* Show advice/task only after saving mood */}
+                  {showAdvice && (
+                    <div className="mt-8 text-xl font-semibold text-center text-[#6C63A6] dark:text-[#A09ABC]">
+                      {moodAdvice[moodData[0]?.emoji] || "Thank you for sharing your mood. Take care of yourself today!"}
+                    </div>
+                  )}
                 </div>
                 {/* Mood History (right) */}
                 <div className={`flex flex-col flex-1 ${layoutDirection === "flex-row gap-12" ? "ml-12" : "mt-8"}`}>

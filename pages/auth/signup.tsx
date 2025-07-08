@@ -34,6 +34,7 @@ export default function Signup() {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [agreedTerms, setAgreedTerms] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -46,11 +47,8 @@ export default function Signup() {
       return;
     }
     setLoading(true);
-    
+
     try {
-      console.log("Starting signup process...");
-      
-      // First, try to create the user without metadata
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -58,47 +56,51 @@ export default function Signup() {
           data: {
             first_name: form.firstName,
             last_name: form.lastName,
-            phone: form.phone,
+            phone: form.phone || null, // phone is optional
           }
         }
       });
-      
-      console.log("Signup response:", { data, error });
-      
+
       if (error) {
-        console.error("Auth error:", error);
-        // Optionally, handle the "already registered" error here if needed
-        setError(error.message);
+        const msg = error.message?.toLowerCase() || "";
+        if (
+          msg.includes("already registered") ||
+          msg.includes("already exists") ||
+          (msg.includes("email") && msg.includes("exists")) ||
+          (msg.includes("user") && msg.includes("exists"))
+        ) {
+          setError("This email is already registered. Please use another email or sign in.");
+        } else {
+          setError(error.message);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Handle case where user exists but is unconfirmed
+      if (data.user && !data.user.confirmed_at) {
+        setError("This email is already registered. Please use another email or sign in.");
         setLoading(false);
         return;
       }
 
       // If user was created successfully, create the profile
       if (data.user) {
-        console.log("User created, creating profile...");
-        const { error: profileError } = await supabase
+        await supabase
           .from("profiles")
           .insert([
             {
               id: data.user.id,
               email: data.user.email,
               full_name: `${form.firstName} ${form.lastName}`,
-              phone: form.phone,
+              phone: form.phone || null,
             },
           ]);
-        
-        console.log("Profile creation result:", { profileError });
-        
-        if (profileError) {
-          console.error("Profile creation error:", profileError);
-          // Don't show this error to user as the account was created
-        }
       }
 
       setSuccess(true);
       setLoading(false);
     } catch (err) {
-      console.error("Signup error:", err);
       setError("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
@@ -107,7 +109,7 @@ export default function Signup() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center relative overflow-hidden">
       <Head>
-        <title>Sign Up | Reflectly</title>
+        <title>{error ? `Error: ${error}` : "Sign Up | Reflectly"}</title>
       </Head>
       {/* Animated Background */}
       <div
@@ -123,8 +125,10 @@ export default function Signup() {
       <div className="relative z-10 flex flex-col md:flex-row items-stretch justify-center w-full max-w-lg min-h-[auto] h-auto bg-white/25 border border-white/40 rounded-3xl shadow-2xl backdrop-blur-2xl mx-1 my-4 overflow-hidden" style={{ boxShadow: "0 8px 32px 0 #A09ABC33, 0 0 0 1.5px #fff3" }}>
         {/* Left: Form */}
         <div className="flex-1 flex flex-col justify-center px-6 py-6 md:px-10 md:py-10 min-w-[220px] max-w-[600px]">
+          {/* REMOVE the error box above the form */}
           <motion.div initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 1 }} className="flex flex-col items-center mb-2">
             <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+              {/* SVG Icon */}
               <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="14" y="4" width="8" height="20" rx="4" fill="#A09ABC"/>
                 <rect x="16" y="24" width="4" height="6" rx="2" fill="#D4BEBE"/>
@@ -151,8 +155,18 @@ export default function Signup() {
             <input id="password" name="password" type="password" required value={form.password} onChange={handleChange} className="p-1 md:p-2 rounded-lg border border-[#D5CFE1] bg-white/80 text-[#6C63A6] text-xs md:text-sm placeholder-[#A09ABC] focus:outline-none focus:ring-2 focus:ring-[#A09ABC] transition-all duration-200 hover:shadow-lg w-full" />
             <label htmlFor="confirm" className="text-[#6C63A6] font-semibold text-xs md:text-sm mt-1">Re-enter password</label>
             <input id="confirm" name="confirm" type="password" required value={form.confirm} onChange={handleChange} className="p-1 md:p-2 rounded-lg border border-[#D5CFE1] bg-white/80 text-[#6C63A6] text-xs md:text-sm placeholder-[#A09ABC] focus:outline-none focus:ring-2 focus:ring-[#A09ABC] transition-all duration-200 hover:shadow-lg w-full" />
-            <label htmlFor="phone" className="text-[#6C63A6] font-semibold text-xs md:text-sm mt-1">Phone Number</label>
-            <input id="phone" name="phone" type="tel" required value={form.phone} onChange={handleChange} className="p-1 md:p-2 rounded-lg border border-[#D5CFE1] bg-white/80 text-[#6C63A6] text-xs md:text-sm placeholder-[#A09ABC] focus:outline-none focus:ring-2 focus:ring-[#A09ABC] transition-all duration-200 hover:shadow-lg w-full" />
+            <label htmlFor="phone" className="text-[#6C63A6] font-semibold text-xs md:text-sm mt-1">
+              Phone Number <span className="font-normal text-[#A09ABC]">(optional)</span>
+            </label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              value={form.phone}
+              onChange={handleChange}
+              className="p-1 md:p-2 rounded-lg border border-[#D5CFE1] bg-white/80 text-[#6C63A6] text-xs md:text-sm placeholder-[#A09ABC] focus:outline-none focus:ring-2 focus:ring-[#A09ABC] transition-all duration-200 hover:shadow-lg w-full"
+              placeholder="Phone Number (optional)"
+            />
             <div className="flex items-center gap-1 text-[10px] md:text-xs text-[#6C63A6] font-light mt-1">
               <input
                 type="checkbox"
@@ -166,14 +180,23 @@ export default function Signup() {
                 I&apos;ve read and agree with <button type="button" className="underline text-[#6C63A6] hover:text-[#A09ABC]" style={{background:'none',border:'none',padding:0,cursor:'pointer'}} onClick={() => setShowTerms(true)}>Terms of Service</button> and our <button type="button" className="underline text-[#6C63A6] hover:text-[#A09ABC]" style={{background:'none',border:'none',padding:0,cursor:'pointer'}} onClick={() => setShowPrivacy(true)}>Privacy Policy</button>
               </label>
             </div>
-            <button className="mt-2 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-base md:text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30 w-full" type="submit" disabled={success || loading || !agreedTerms}>
+            <button
+              className="mt-2 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-base md:text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30 w-full"
+              type="submit"
+              disabled={success || loading || !agreedTerms}
+            >
               {loading ? "Signing up..." : "Sign up"}
             </button>
+            {/* Error box BELOW the button */}
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mt-2 text-center">
+                {error}
+              </div>
+            )}
           </form>
           <div className="text-center text-[#6C63A6] mt-1 text-xs md:text-sm">
             Already have an account? <span className="text-[#A09ABC] font-semibold cursor-pointer hover:underline" onClick={() => router.push("/auth/login")}>Sign in</span>
           </div>
-          {error && <div className="text-red-500 text-center mt-1 text-xs md:text-sm">{error}</div>}
         </div>
         {/* Right: Illustration */}
         <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 min-w-[80px] max-w-[120px] relative">

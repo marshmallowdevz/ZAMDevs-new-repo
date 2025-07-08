@@ -11,6 +11,7 @@ type JournalEntry = {
   content: string;
   user_id: string;
   created_at: string;
+  updated_at?: string;
   public?: boolean;
   title?: string;
 };
@@ -85,7 +86,7 @@ export default function Journal() {
         .eq("id", editingEntry.id)
         .select();
       if (!error && data) {
-        setEntries(entries.map(e => e.id === editingEntry.id ? { ...e, content: newEntry, public: isPublic } : e));
+        setEntries(entries.map(e => e.id === editingEntry.id ? { ...e, content: newEntry, public: isPublic, updated_at: data[0].updated_at } : e));
         setEditingEntry(null);
         setNewEntry("");
         setEntryTitle("");
@@ -159,10 +160,10 @@ export default function Journal() {
     color: '#6C63A6', fontWeight: 500, fontSize: 16
   };
   const switchOuter = {
-    width: 44, height: 24, borderRadius: 12, background: isPublic ? 'linear-gradient(90deg, #A09ABC 0%, #B6A6CA 100%)' : '#e5e7eb', position: 'relative' as 'relative', cursor: 'pointer', transition: 'background 0.3s', display: 'inline-block', verticalAlign: 'middle'
+    width: 44, height: 24, borderRadius: 12, background: isPublic ? 'linear-gradient(90deg, #A09ABC 0%, #B6A6CA 100%)' : '#e5e7eb', position: 'relative' as const, cursor: 'pointer', transition: 'background 0.3s', display: 'inline-block', verticalAlign: 'middle'
   };
   const switchInner = {
-    position: 'absolute' as 'absolute', top: 2, left: isPublic ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px #D5CFE1', transition: 'left 0.3s'
+    position: 'absolute' as const, top: 2, left: isPublic ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px #D5CFE1', transition: 'left 0.3s'
   };
 
   if (loading) {
@@ -276,7 +277,9 @@ export default function Journal() {
                         {entry.title && entry.title.trim() !== '' ? entry.title : `Entry #${entries.length - idx}`}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span>{new Date(entry.created_at).toLocaleString()}</span>
+                        <span>
+                          {new Date(entry.updated_at || entry.created_at).toLocaleString()}
+                        </span>
                         {entry.public && <span className="bg-[#A09ABC] text-white px-2 py-1 rounded-full text-xs">🌍 Public</span>}
                         {!entry.public && <span className="bg-gray-300 text-[#6C63A6] px-2 py-1 rounded-full text-xs">🔒 Private</span>}
                         <button

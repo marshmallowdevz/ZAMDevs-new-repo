@@ -4,6 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import { supabase } from "../../lib/supabaseClient";
 import { useDarkMode } from "../../components/DarkModeContext";
 import { useRouter } from "next/router";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const moodOptions = ["😄", "🙂", "😐", "😔", "😢", "😡", "😱", "😴", "🤩", "😇", "😂", "🥲", "😏", "😬", "😭", "😤", "😳", "🥳", "😎", "🥺"];
 
@@ -325,33 +326,64 @@ export default function Dashboard() {
                 {/* Mood Consistency */}
                 <div className="rounded-2xl bg-white/60 dark:bg-[#23234a] shadow p-6 flex flex-col items-center justify-center backdrop-blur-md border border-white/30 dark:border-[#23234a]">
                   <div className="text-[#A09ABC] text-lg font-semibold mb-4">Mood Consistency</div>
-                  <div className="relative flex flex-col items-center justify-center mb-6">
-                    {/* Circular progress bar */}
-                    <svg width="110" height="110" viewBox="0 0 110 110" className="drop-shadow-lg">
-                      <defs>
-                        <linearGradient id="moodGradient" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor="#A09ABC" />
-                          <stop offset="100%" stopColor="#B6A6CA" />
-                        </linearGradient>
-                      </defs>
-                      <circle
-                        cx="55" cy="55" r="48"
-                        fill="#ede9fe"
-                        stroke="#e0d7f3"
-                        strokeWidth="8"
-                      />
-                      <circle
-                        cx="55" cy="55" r="48"
-                        fill="none"
-                        stroke="url(#moodGradient)"
-                        strokeWidth="8"
-                        strokeDasharray={2 * Math.PI * 48}
-                        strokeDashoffset={2 * Math.PI * 48 * (1 - 0.8)} // 80% consistency
-                        strokeLinecap="round"
-                        style={{ transition: 'stroke-dashoffset 1s cubic-bezier(.4,2,.6,1)' }}
-                      />
-                    </svg>
-                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl font-extrabold text-[#A09ABC]" style={{ fontFamily: 'serif' }}>80%</span>
+                  <div className="w-full flex flex-col items-center justify-center mb-6">
+                    {/* AreaChart with moods and entries */}
+                    <div style={{ width: '100%', maxWidth: 350, height: 200 }}>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <AreaChart data={[
+                          { date: '6/29/2025', moods: 2, entries: 4 },
+                          { date: '6/30/2025', moods: 2, entries: 1 },
+                          { date: '7/1/2025', moods: 2, entries: 0 },
+                          { date: '7/2/2025', moods: 2, entries: 0 },
+                          { date: '7/3/2025', moods: 1, entries: 1 },
+                          { date: '7/4/2025', moods: 1, entries: 0 },
+                          { date: '7/5/2025', moods: 2, entries: 2 },
+                          { date: '7/6/2025', moods: 3, entries: 3 },
+                        ]} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+                          <defs>
+                            <linearGradient id="lightPurple" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#B6A6CA" stopOpacity={0.7} />
+                              <stop offset="100%" stopColor="#E1D8E9" stopOpacity={0.2} />
+                            </linearGradient>
+                            <linearGradient id="darkPurple" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#6C3483" stopOpacity={0.8} />
+                              <stop offset="100%" stopColor="#23234a" stopOpacity={0.2} />
+                            </linearGradient>
+                          </defs>
+                          <XAxis dataKey="date" stroke="#A09ABC" tick={{ fontSize: 12 }} />
+                          <YAxis stroke="#A09ABC" allowDecimals={false} tick={{ fontSize: 12 }} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: 'rgba(255,255,255,0.95)',
+                              border: '1px solid #B6A6CA',
+                              borderRadius: '8px',
+                              color: '#6C63A6',
+                              fontWeight: 600
+                            }}
+                            formatter={(value) => (typeof value === 'number' ? Math.round(value) : value)}
+                          />
+                          <Legend verticalAlign="top" height={36} iconType="circle" />
+                          <Area
+                            type="monotone"
+                            dataKey="moods"
+                            stroke="#B6A6CA"
+                            fill="url(#lightPurple)"
+                            strokeWidth={3}
+                            dot={{ r: 4, fill: '#B6A6CA' }}
+                            activeDot={{ r: 7, fill: '#B6A6CA' }}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="entries"
+                            stroke="#6C3483"
+                            fill="url(#darkPurple)"
+                            strokeWidth={3}
+                            dot={{ r: 4, fill: '#6C3483' }}
+                            activeDot={{ r: 7, fill: '#6C3483' }}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
                   <button onClick={handleViewTrends} className="px-6 py-2 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition">View Trends</button>
                 </div>

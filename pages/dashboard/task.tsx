@@ -8,10 +8,9 @@ import Link from "next/link";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 const STATUS_COLUMNS = [
-  { key: "todo", label: "To Do", color: "bg-[#A09ABC]", card: "bg-[#E1D8E9]" },
-  { key: "inprogress", label: "In Progress", color: "bg-[#B6A6CA]" },
-  { key: "review", label: "In Review", color: "bg-[#D5CFE1]", card: "bg-[#B6A6CA]" },
-  { key: "done", label: "Done", color: "bg-[#B6A6CA]" },
+  { key: "todo", label: "To Do", color: "bg-[#E5C6F7]", card: "bg-[#F3E6FF]" }, // Light Purple
+  { key: "inprogress", label: "In Progress", color: "bg-[#E0C6F7]", card: "bg-[#F6E9FF]" }, // Light Violet
+  { key: "done", label: "Done", color: "bg-[#BE93D4]", card: "bg-[#F6E9FF]" }, // Light Periwinkle
 ];
 
 export default function TaskPage() {
@@ -134,11 +133,6 @@ export default function TaskPage() {
       <main className={`flex-1 p-8 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`}>
         <div className="flex items-center justify-between mb-8">
           <h2 className={`text-3xl font-bold ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>📝 Task Manager</h2>
-          <Link href="/dashboard/settings">
-            <button className={`flex items-center gap-2 px-4 py-2 rounded-full ${darkMode ? 'bg-[#23234a] text-[#A09ABC]' : 'bg-white text-[#6C63A6]'} font-semibold shadow hover:bg-[#f0edf6] transition-all duration-300 border border-[#A09ABC]/20`}>
-              <FaCog /> Settings
-            </button>
-          </Link>
         </div>
         {statusWarning && (
           <div className="mb-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 border border-yellow-300">
@@ -180,7 +174,7 @@ export default function TaskPage() {
         </div>
         {/* Kanban Board with Drag and Drop */}
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto w-full">
             {STATUS_COLUMNS.map((col, colIdx) => (
               <Droppable droppableId={col.key} key={col.key}>
                 {(provided, snapshot) => (
@@ -204,26 +198,20 @@ export default function TaskPage() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`rounded-xl p-4 shadow border flex flex-col gap-2 transition-all duration-200
-                                ${darkMode ? 'bg-[#1a1a2e] border-[#23234a] text-[#A09ABC]' : `${col.card} border-white/30 text-[#6C63A6]`}
-                                ${snapshot.isDragging ? 'ring-4 ring-[#A09ABC]/40 scale-105' : ''}`}
+                              className={`rounded-xl p-6 shadow border flex items-center transition-all duration-200 w-full min-h-[70px] text-lg ${darkMode ? '' : `${col.card} border-white/30 text-[#6C63A6]`} ${snapshot.isDragging ? 'ring-4 ring-[#A09ABC]/40 scale-105' : ''}`}
                             >
-                              <div className="flex items-center gap-2">
+                              <span className="flex items-center gap-3 flex-1">
                                 <input
                                   type="checkbox"
                                   checked={task.completed}
                                   onChange={() => toggleTask(task.id, task.completed)}
-                                  className="h-5 w-5 text-[#A09ABC]"
+                                  className="h-5 w-5 text-[#A09ABC] accent-[#A09ABC]"
                                 />
                                 <span className={`font-semibold ${task.completed ? 'line-through opacity-60' : ''}`}>{task.description}</span>
-                              </div>
-                              <div className="flex items-center gap-2 mt-2">
-                                <FaUserCircle className="text-xl" />
-                                <span className="text-xs">You</span>
-                                <span className={`ml-auto text-xs px-2 py-1 rounded-full ${col.key === 'done' ? 'bg-green-400/30 text-green-700' : col.key === 'review' ? 'bg-yellow-200/30 text-yellow-700' : col.key === 'inprogress' ? 'bg-blue-200/30 text-blue-700' : 'bg-[#A09ABC]/20 text-[#A09ABC]'}`}>{col.label}</span>
-                              </div>
-                              <div className="flex gap-2 mt-2">
-                                <button onClick={() => deleteTask(task.id)} className="ml-auto text-red-500 hover:underline text-xs">🗑️</button>
+                              </span>
+                              <div className="flex items-center gap-3 ml-auto">
+                                <span className={`text-base px-4 py-1 rounded-full ${col.key === 'done' ? 'bg-green-200 text-green-700' : col.key === 'inprogress' ? 'bg-blue-200 text-blue-700' : 'bg-[#A09ABC]/20 text-[#A09ABC]'}`}>{col.label}</span>
+                                <button onClick={() => deleteTask(task.id)} className="text-red-500 hover:scale-110 transition-transform text-xl" title="Delete Task">🗑️</button>
                               </div>
                             </div>
                           )}

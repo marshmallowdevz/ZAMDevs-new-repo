@@ -29,7 +29,16 @@ export default function Journal() {
   const [isPublic, setIsPublic] = useState(true);
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const router = useRouter();
-  const moodOptions = ["😊", "😌", "😥", "🥰", "😪"];
+  const moodOptions = ["😐", "😊", "😌", "😥", "🥰", "😪"];
+  // Map mood emoji to their names
+  // const moodNameMap: { [key: string]: string } = {
+  //   "😐": "Neutral",
+  //   "😊": "Happy",
+  //   "😌": "Calm",
+  //   "😥": "Sad",
+  //   "🥰": "Loved",
+  //   "😪": "Tired",
+  // };
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
@@ -82,7 +91,7 @@ export default function Journal() {
       // Update existing entry
       const { data, error } = await supabase
         .from("journal")
-        .update({ content: newEntry, public: isPublic })
+        .update({ content: newEntry, public: isPublic, updated_at: new Date().toISOString(), title: entryTitle, mood: selectedMood || undefined })
         .eq("id", editingEntry.id)
         .select();
       if (!error && data) {

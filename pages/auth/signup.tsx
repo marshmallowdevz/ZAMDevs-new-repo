@@ -42,6 +42,10 @@ export default function Signup() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!agreedTerms) {
+      setError("Please agree to the Terms of Service and Privacy Policy before signing up.");
+      return;
+    }
     if (form.password !== form.confirm) {
       setError("Passwords do not match.");
       return;
@@ -77,14 +81,14 @@ export default function Signup() {
         return;
       }
 
-      // Handle case where user exists but is unconfirmed
+      // If user was created but not yet confirmed
       if (data.user && !data.user.confirmed_at) {
         setError("This email is already registered. Please use another email or sign in.");
         setLoading(false);
         return;
       }
 
-      // If user was created successfully, create the profile
+      // If user was created successfully and confirmed, create the profile
       if (data.user) {
         await supabase
           .from("profiles")
@@ -98,6 +102,7 @@ export default function Signup() {
           ]);
       }
 
+      // Show confirmation message for truly new users
       setSuccess(true);
       setLoading(false);
     } catch (err) {
@@ -138,6 +143,12 @@ export default function Signup() {
             <h1 className="text-lg md:text-xl font-bold text-[#6C63A6] mt-0.5 mb-0.5 text-center tracking-wide">Sign Up</h1>
             <div className="w-8 md:w-10 h-0.5 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] opacity-60 mb-0.5" />
           </motion.div>
+          {/* Error box ABOVE the form for visibility */}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-2 text-center">
+              {error}
+            </div>
+          )}
           <form className="flex flex-col gap-1 md:gap-2 w-full" onSubmit={handleSignup}>
             <div className="flex flex-row gap-2 w-full">
               <div className="flex-1 flex flex-col">
@@ -183,20 +194,20 @@ export default function Signup() {
             <button
               className="mt-2 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-base md:text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30 w-full"
               type="submit"
-              disabled={success || loading || !agreedTerms}
+              disabled={success || loading}
             >
               {loading ? "Signing up..." : "Sign up"}
             </button>
-            {/* Error box BELOW the button */}
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mt-2 text-center">
-                {error}
-              </div>
-            )}
           </form>
           <div className="text-center text-[#6C63A6] mt-1 text-xs md:text-sm">
             Already have an account? <span className="text-[#A09ABC] font-semibold cursor-pointer hover:underline" onClick={() => router.push("/auth/login")}>Sign in</span>
           </div>
+          {/* After the form, show a confirmation message if success is true */}
+          {success && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mt-2 text-center">
+              Registration successful! Please check your email to confirm your account before signing in.
+            </div>
+          )}
         </div>
         {/* Right: Illustration */}
         <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 min-w-[80px] max-w-[120px] relative">

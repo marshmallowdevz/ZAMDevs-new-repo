@@ -198,7 +198,7 @@ export default function TaskPage() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`rounded-xl p-6 shadow border flex items-center transition-all duration-200 w-full min-h-[70px] text-lg ${darkMode ? '' : `${col.card} border-white/30 text-[#6C63A6]`} ${snapshot.isDragging ? 'ring-4 ring-[#A09ABC]/40 scale-105' : ''}`}
+                              className={`rounded-xl p-6 shadow border flex items-center transition-all duration-200 w-full min-h-[70px] text-lg ${darkMode ? '' : `${col.card} border-white/30 text-[#6C63A6]`} ${snapshot.isDragging ? 'ring-4 ring-[#A09ABC]/40 scale-105 shadow-2xl z-20' : ''}`}
                             >
                               <span className="flex items-center gap-3 flex-1">
                                 <input

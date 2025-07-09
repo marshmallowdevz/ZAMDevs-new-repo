@@ -217,6 +217,13 @@ setTimeout(() => setProfileSuccess(false), 3000);
     alert("Change password is not implemented yet.");
   };
 
+function handleCancelEdit() {
+  setEditMode(false);
+  setNewAvatarFile(null);
+  setNewHeaderFile(null);
+  setProfileError(null);
+}
+
 return (
 <div className={`relative min-h-screen w-full flex animate-gradient-bg overflow-hidden ${darkMode ? 'bg-[#1a1a2e]' : ''}`}>
 <Head>

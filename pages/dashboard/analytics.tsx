@@ -29,6 +29,24 @@ export default function Analytics() {
   const router = useRouter();
   const { darkMode } = useDarkMode();
 
+  // Generate random stars for dark mode decoration
+  const generateStars = () => {
+    const stars = [];
+    for (let i = 0; i < 18; i++) {
+      stars.push({
+        id: i,
+        top: Math.random() * 90 + 2, // avoid edges
+        left: Math.random() * 90 + 2,
+        size: Math.random() * 10 + 8, // 8-18px
+        opacity: Math.random() * 0.4 + 0.6,
+        blur: Math.random() > 0.5 ? 8 : 0,
+        animationDelay: Math.random() * 3
+      });
+    }
+    return stars;
+  };
+  const [stars] = useState(generateStars());
+
   useEffect(() => {
     async function fetchData() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -90,8 +108,29 @@ export default function Analytics() {
         <title>Analytics Dashboard - Reflectly</title>
         <meta name="description" content="Mood and Journal Analytics" />
       </Head>
-      <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
+      <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`} style={{ position: 'relative' }}>
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+        {/* Scattered starfield for dark mode */}
+        {darkMode && stars.map(star => (
+          <div
+            key={star.id}
+            className="star-glow"
+            style={{
+              position: 'absolute',
+              top: `${star.top}%`,
+              left: `${star.left}%`,
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              opacity: star.opacity,
+              filter: `drop-shadow(0 0 ${star.blur}px #fffbe9) drop-shadow(0 0 24px #A09ABC)` + (star.blur ? ' blur(1px)' : ''),
+              zIndex: 0,
+              animation: `starTwinkle ${3 + star.animationDelay}s infinite alternate ease-in-out`,
+              pointerEvents: 'none',
+            }}
+          >
+            {starSVG('#fff', '#A09ABC')}
+          </div>
+        ))}
         <main className={`flex-1 p-4 md:p-10 min-h-screen transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
           <div className="w-full flex justify-center">
             <div className="w-full max-w-6xl">
@@ -153,6 +192,40 @@ export default function Analytics() {
           </div>
         </main>
       </div>
+      <style jsx global>{`
+        .star-glow {
+          filter: drop-shadow(0 0 24px #fffbe9) drop-shadow(0 0 48px #A09ABC);
+          opacity: 0.85;
+          animation: starTwinkle 5s infinite alternate ease-in-out;
+        }
+        @keyframes starTwinkle {
+          0% { transform: translateY(0) scale(1); opacity: 0.85; }
+          50% { transform: translateY(-12px) scale(1.05); opacity: 1; }
+          100% { transform: translateY(0) scale(1); opacity: 0.85; }
+        }
+      `}</style>
     </>
+  );
+}
+
+function starSVG(color1: string, color2: string) {
+  return (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 0 16px #fffbe9) blur(0.5px)' }}>
+      <defs>
+        <radialGradient id="starGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+          <stop offset="0%" stopColor={color1} stopOpacity="1" />
+          <stop offset="100%" stopColor={color2} stopOpacity="0.7" />
+        </radialGradient>
+      </defs>
+      {/* 5-pointed star */}
+      <path 
+        d="M50 10 L61 35 L88 35 L68 55 L78 82 L50 65 L22 82 L32 55 L12 35 L39 35 Z" 
+        fill="url(#starGradient)" 
+        stroke={color2} 
+        strokeWidth="2"
+      />
+      {/* Inner glow */}
+      <circle cx="50" cy="50" r="15" fill={color1} opacity="0.3" />
+    </svg>
   );
 }

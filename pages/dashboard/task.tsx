@@ -8,9 +8,9 @@ import Link from "next/link";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 const STATUS_COLUMNS = [
-  { key: "todo", label: "To Do", color: "bg-[#E5C6F7]", card: "bg-[#F3E6FF]" }, // Light Purple
-  { key: "inprogress", label: "In Progress", color: "bg-[#E0C6F7]", card: "bg-[#F6E9FF]" }, // Light Violet
-  { key: "done", label: "Done", color: "bg-[#BE93D4]", card: "bg-[#F6E9FF]" }, // Light Periwinkle
+  { key: "todo", label: "To Do", color: "bg-[#E5C6F7] dark:bg-[#6C63A6]", card: "bg-[#F3E6FF] dark:bg-[#7c3aed]", text: "text-[#6C63A6] dark:text-[#E1D8E9]" }, // Light Purple / Purple
+  { key: "inprogress", label: "In Progress", color: "bg-[#D5CFE1] dark:bg-[#b4aee8]", card: "bg-[#E1D8E9] dark:bg-[#a09abc]", text: "text-[#6C63A6] dark:text-white" }, // Light Periwinkle / Periwinkle
+  { key: "done", label: "Done", color: "bg-[#E0C6F7] dark:bg-[#a084ca]", card: "bg-[#F6E9FF] dark:bg-[#b4aee8]", text: "text-[#6C63A6] dark:text-white" }, // Light Violet / Violet
 ];
 
 export default function TaskPage() {
@@ -87,7 +87,8 @@ export default function TaskPage() {
 
   async function toggleTask(id: string, completed: boolean) {
     setError(null);
-    const { error: toggleError } = await supabase.from("tasks").update({ completed: !completed }).eq("id", id);
+    const completedAt = !completed ? new Date().toISOString() : null;
+    const { error: toggleError } = await supabase.from("tasks").update({ completed: !completed, completed_at: completedAt }).eq("id", id);
     if (toggleError) {
       setError("Failed to toggle task: " + toggleError.message);
     }
@@ -125,12 +126,24 @@ export default function TaskPage() {
   };
 
   return (
-    <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
+    <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`} style={{ position: 'relative', overflow: 'hidden' }}>
       <Head>
         <title>Task Manager | Reflectly</title>
       </Head>
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-      <main className={`flex-1 p-8 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`}>
+      {/* Glowing background for dark mode (background only, zIndex: 0) */}
+      {darkMode && (
+        <>
+          {/* Only glowing stars, no glowing gradient background */}
+          <div className="star-glow" style={{ position: 'fixed', top: '10%', left: '20%', fontSize: 28, zIndex: 0 }}>✦</div>
+          <div className="star-glow" style={{ position: 'fixed', top: '18%', left: '80%', fontSize: 18, zIndex: 0 }}>✧</div>
+          <div className="star-glow" style={{ position: 'fixed', bottom: '12%', left: '25%', fontSize: 22, zIndex: 0 }}>✦</div>
+          <div className="star-glow" style={{ position: 'fixed', bottom: '8%', right: '18%', fontSize: 16, zIndex: 0 }}>✧</div>
+          <div className="star-glow" style={{ position: 'fixed', top: '40%', right: '10%', fontSize: 20, zIndex: 0 }}>✦</div>
+          <div className="star-glow" style={{ position: 'fixed', bottom: '30%', left: '60%', fontSize: 14, zIndex: 0 }}>✧</div>
+        </>
+      )}
+      <main className={`flex-1 p-8 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`} style={{ position: 'relative', zIndex: 1 }}>
         <div className="flex items-center justify-between mb-8">
           <h2 className={`text-3xl font-bold ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>📝 Task Manager</h2>
         </div>
@@ -167,7 +180,7 @@ export default function TaskPage() {
             disabled={adding || !newTask.trim()}
             className={`flex items-center gap-2 px-5 py-2 rounded-full font-bold shadow transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#A09ABC]/30
               ${adding || !newTask.trim() ? 'opacity-60 cursor-not-allowed' : ''}
-              bg-gradient-to-r from-[#A09ABC] via-[#B6A6CA] to-[#D5CFE1] text-white hover:from-[#B6A6CA] hover:to-[#A09ABC] animate-pulse`}
+              ${darkMode ? 'bg-[#23234a] text-[#E1D8E9] hover:bg-[#1a1a2e]' : 'bg-gradient-to-r from-[#A09ABC] via-[#B6A6CA] to-[#D5CFE1] text-white hover:from-[#B6A6CA] hover:to-[#A09ABC] animate-pulse'}`}
           >
             <FaPlus /> Add
           </button>
@@ -182,11 +195,11 @@ export default function TaskPage() {
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={`rounded-2xl p-4 shadow-xl min-h-[300px] flex flex-col transition-all duration-300
-                      ${darkMode ? 'bg-[#23234a]' : col.color}
+                      ${col.color}
                       ${snapshot.isDraggingOver ? 'ring-4 ring-[#A09ABC]/40 scale-105' : ''}
                       ${colIdx === 0 && collapsed ? 'pl-8' : ''}`}
                   >
-                    <div className={`flex items-center gap-2 mb-4 text-lg font-bold ${darkMode ? 'text-[#A09ABC]' : 'text-white'}`}>{col.label}</div>
+                    <div className={`flex items-center gap-2 mb-4 text-lg font-bold ${col.text}`}>{col.label}</div>
                     <div className="space-y-4 flex-1">
                       {tasks.filter(task => (task.status || "todo") === col.key).length === 0 && (
                         <div className={`text-center italic ${darkMode ? 'text-[#A09ABC]' : 'text-white/80'}`}>No tasks</div>
@@ -198,7 +211,7 @@ export default function TaskPage() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`rounded-xl p-6 shadow border flex items-center transition-all duration-200 w-full min-h-[70px] text-lg ${darkMode ? '' : `${col.card} border-white/30 text-[#6C63A6]`} ${snapshot.isDragging ? 'ring-4 ring-[#A09ABC]/40 scale-105 shadow-2xl z-20' : ''}`}
+                              className={`rounded-xl p-6 shadow border flex items-center transition-all duration-200 w-full min-h-[70px] text-lg ${col.card} border-white/30 ${col.text} ${snapshot.isDragging ? 'ring-4 ring-[#A09ABC]/40 scale-105' : ''}`}
                             >
                               <span className="flex items-center gap-3 flex-1">
                                 <input
@@ -207,7 +220,7 @@ export default function TaskPage() {
                                   onChange={() => toggleTask(task.id, task.completed)}
                                   className="h-5 w-5 text-[#A09ABC] accent-[#A09ABC]"
                                 />
-                                <span className={`font-semibold ${task.completed ? 'line-through opacity-60' : ''}`}>{task.description}</span>
+                                <span className={`font-semibold ${task.completed ? 'line-through opacity-60' : ''} ${col.text}`}>{task.description}</span>
                               </span>
                               <div className="flex items-center gap-3 ml-auto">
                                 <span className={`text-base px-4 py-1 rounded-full ${col.key === 'done' ? 'bg-green-200 text-green-700' : col.key === 'inprogress' ? 'bg-blue-200 text-blue-700' : 'bg-[#A09ABC]/20 text-[#A09ABC]'}`}>{col.label}</span>
@@ -226,6 +239,22 @@ export default function TaskPage() {
           </div>
         </DragDropContext>
       </main>
+      <style jsx global>{`
+        @keyframes glowPulse {
+          0% { opacity: 0.7; filter: blur(60px); }
+          50% { opacity: 1; filter: blur(80px); }
+          100% { opacity: 0.7; filter: blur(60px); }
+        }
+        .star-glow {
+          color: #fffbe9;
+          text-shadow: 0 0 12px #fffbe9, 0 0 24px #A09ABC, 0 0 36px #B6A6CA;
+          animation: starTwinkle 3s infinite alternate;
+        }
+        @keyframes starTwinkle {
+          0% { opacity: 0.7; text-shadow: 0 0 12px #fffbe9, 0 0 24px #A09ABC, 0 0 36px #B6A6CA; }
+          100% { opacity: 1; text-shadow: 0 0 24px #fffbe9, 0 0 36px #A09ABC, 0 0 48px #B6A6CA; }
+        }
+      `}</style>
     </div>
   );
 }

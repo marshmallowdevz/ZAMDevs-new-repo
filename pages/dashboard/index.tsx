@@ -26,16 +26,6 @@ export default function Dashboard() {
   const [streak, setStreak] = useState(0);
 
 
-  const [moodChartData] = useState([
-    { date: '6/30/2025', entries: 4, moods: 2 },
-    { date: '7/1/2025', entries: 2, moods: 1 },
-    { date: '7/2/2025', entries: 3, moods: 2 },
-    { date: '7/3/2025', entries: 1, moods: 1 },
-    { date: '7/4/2025', entries: 2, moods: 2 },
-    { date: '7/5/2025', entries: 3, moods: 3 },
-    { date: '7/6/2025', entries: 4, moods: 4 },
-  ]);
-
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDate, setModalDate] = useState("");
   const [modalMood, setModalMood] = useState("");
@@ -250,8 +240,8 @@ export default function Dashboard() {
   const calendarCells: React.ReactNode[] = [];
   for (let i = 0; i < totalCells; i++) {
     const day = i - firstDayOfWeek + 1;
-    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    if (i < firstDayOfWeek || day > daysInMonthUTC) {
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    if (i < firstDayOfWeek || day > daysInMonth) {
       calendarCells.push(<div key={`empty-${i}`}></div>);
     } else {
       const emoji = monthlyMoods[dateStr] || "😊";
@@ -270,7 +260,7 @@ export default function Dashboard() {
   }
 
   // Calculate mood consistency for the current month
-  const daysInCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysInCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
   const daysWithMood = Object.keys(monthlyMoods).length;
   const moodConsistency = daysInCurrentMonth > 0 ? Math.round((daysWithMood / daysInCurrentMonth) * 100) : 0;
 
@@ -464,7 +454,7 @@ export default function Dashboard() {
               {/* Mood Calendar */}
               <div className="rounded-2xl bg-white/60 dark:bg-[#23234a] shadow p-6 backdrop-blur-md border border-white/30 dark:border-[#23234a] col-span-1">
                 <h3 className="text-xl font-bold text-[#A09ABC] mb-4">Mood Calendar</h3>
-                <div className="text-center text-[#6C63A6] font-semibold mb-2">{now.toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
+                <div className="text-center text-[#6C63A6] font-semibold mb-2">{today.toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
                 <div className="grid grid-cols-7 gap-2">
                   {[...Array(7)].map((_, i) => (
                     <div key={i} className="text-xs text-[#A09ABC] font-bold text-center">

@@ -155,13 +155,13 @@ export default function Dashboard() {
         .order("created_at", { ascending: false })
         .limit(1);
       setRecentJournal(journals && journals[0]);
-      // Fetch latest completed task
+      // Fetch latest completed task (include completed_at)
       const { data: tasks } = await supabase
         .from("tasks")
-        .select("description, created_at")
+        .select("description, created_at, completed_at")
         .eq("user_id", user.id)
         .eq("completed", true)
-        .order("created_at", { ascending: false })
+        .order("completed_at", { ascending: false })
         .limit(1);
       setRecentTask(tasks && tasks[0]);
     }
@@ -424,7 +424,7 @@ export default function Dashboard() {
                       {recentTask ? (
                         <>
                           Completed task: <span className="font-semibold">{recentTask.description}</span>
-                          <span className="ml-auto text-[#A09ABC]/70">{formatTime(recentTask.created_at)}</span>
+                          <span className="ml-auto text-[#A09ABC]/70">{formatTime(recentTask.completed_at || recentTask.created_at)}</span>
                         </>
                       ) : (
                         <span className="italic text-[#A09ABC]/70">No completed task yet</span>

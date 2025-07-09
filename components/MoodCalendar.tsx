@@ -46,20 +46,20 @@ export default function MoodCalendar() {
   }
 
   return (
-    <div style={{ background: palette.paleLilac, borderRadius: 20, padding: 24, boxShadow: '0 2px 12px #D5CFE1', maxWidth: 420, margin: '0 auto' }}>
-      <div style={{ fontWeight: 700, color: palette.purple, fontSize: 20, marginBottom: 12, textAlign: 'center', letterSpacing: 1 }}>
+    <div style={{ background: palette.paleLilac, borderRadius: 20, padding: 12, boxShadow: '0 2px 12px #D5CFE1', maxWidth: 300, margin: '0 auto' }}>
+      <div style={{ fontWeight: 700, color: palette.purple, fontSize: 15, marginBottom: 8, textAlign: 'center', letterSpacing: 1 }}>
         {today.toLocaleString('default', { month: 'long' })} {year}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginBottom: 6, color: palette.purple, fontWeight: 600, fontSize: 14, textAlign: 'center' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3, marginBottom: 3, color: palette.purple, fontWeight: 600, fontSize: 11, textAlign: 'center' }}>
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => <div key={d}>{d}</div>)}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
         {weeks.flat().map((day, idx) => (
           <div key={idx} style={{ aspectRatio: '1/1', position: 'relative', cursor: day ? 'pointer' : 'default' }} onClick={() => day && setSelectedDay(day)}>
             {day && (
               <>
-                <div style={{ fontWeight: 500, color: palette.purple, fontSize: 15 }}>{day}</div>
-                <div style={{ position: 'absolute', left: '50%', bottom: 6, transform: 'translateX(-50%)', fontSize: 18 }}>
+                <div style={{ fontWeight: 500, color: palette.purple, fontSize: 11 }}>{day}</div>
+                <div style={{ position: 'absolute', left: '50%', bottom: 3, transform: 'translateX(-50%)', fontSize: 13 }}>
                   {getMoodForDay(day).emoji}
                 </div>
               </>

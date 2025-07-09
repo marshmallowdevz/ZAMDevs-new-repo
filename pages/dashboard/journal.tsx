@@ -53,6 +53,24 @@ export default function Journal() {
     { name: 'Symbols', emojis: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮','🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅺','🆘','❌','⭕','🛑','⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚳','🔞','📵','🚭','❗','❓','❕','❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🈂️','🛂','🛃','🛄','🛅','🚹','🚺','🚼','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆖','🆗','🆙','🆒','🆓','🆕','🆚','🈁','🈂️'] }
   ];
   const [activeEmojiCategory, setActiveEmojiCategory] = useState(emojiCategories[0].name);
+  
+  // Generate random stars for dark mode decoration
+  const generateStars = () => {
+    const stars = [];
+    for (let i = 0; i < 15; i++) {
+      stars.push({
+        id: i,
+        top: Math.random() * 100,
+        left: Math.random() * 100,
+        size: Math.random() * 3 + 1,
+        opacity: Math.random() * 0.5 + 0.3,
+        animationDelay: Math.random() * 3
+      });
+    }
+    return stars;
+  };
+  
+  const [stars] = useState(generateStars());
    
   useEffect(() => {
     async function fetchEntries() {
@@ -188,10 +206,35 @@ export default function Journal() {
       <Head>
         <title>Journal - Reflectly</title>
         <meta name="description" content="Your personal journal entries" />
+        <style jsx>{`
+          @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+          }
+        `}</style>
       </Head>
       <div className={`flex min-h-screen ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <main className={`flex-1 p-10 min-h-screen transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'}`}>
+        <main className={`flex-1 p-10 min-h-screen transition-all duration-300 ${collapsed ? 'ml-0' : 'ml-64'} relative`}>
+          {/* Glow-in-the-dark stars - only visible in dark mode */}
+          {darkMode && stars.map(star => (
+            <div
+              key={star.id}
+              className="absolute pointer-events-none"
+              style={{
+                top: `${star.top}%`,
+                left: `${star.left}%`,
+                width: `${star.size}px`,
+                height: `${star.size}px`,
+                background: 'radial-gradient(circle, #A09ABC 0%, transparent 70%)',
+                borderRadius: '50%',
+                opacity: star.opacity,
+                animation: `twinkle ${3 + star.animationDelay}s ease-in-out infinite`,
+                boxShadow: `0 0 ${star.size * 2}px ${star.size}px rgba(160, 154, 188, 0.3)`,
+                zIndex: 1
+              }}
+            />
+          ))}
           <div className="max-w-3xl mx-auto">
             <h2 className={`text-3xl font-bold mb-6 ${darkMode ? 'text-[#A09ABC]' : 'text-[#A09ABC]'}`}>📔 My Journal</h2>
             {/* Add Entry Button */}

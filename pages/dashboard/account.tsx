@@ -61,7 +61,7 @@ setUserId(user.id);
 // Fetch profile from your 'profiles' table
 const { data: profile } = await supabase
 .from("profiles")
-.select("avatar_url, header_url, full_name, bio, phone")
+.select("avatar_url, header_url, full_name, bio, phone, facebook_url, instagram_url, twitter_url, github_url, reflectly_url")
 .eq("id", user.id)
 .single();
 if (profile) {
@@ -70,6 +70,14 @@ setHeader(profile.header_url || "/default-header.jpg");
 setName(profile.full_name || "Your Name");
 setBio(profile.bio || "Short bio goes here...");
 setPhone(profile.phone || "");
+// Set social links from database
+setSocialLinks({
+  facebook: profile.facebook_url || '',
+  instagram: profile.instagram_url || '',
+  twitter: profile.twitter_url || '',
+  github: profile.github_url || '',
+  reflectly: profile.reflectly_url || ''
+});
 }
 // Fetch journal entries
 const { data: journals } = await supabase
@@ -122,6 +130,11 @@ bio,
 phone,
 avatar_url: avatarUrl,
 header_url: headerUrl,
+facebook_url: socialLinks.facebook,
+instagram_url: socialLinks.instagram,
+twitter_url: socialLinks.twitter,
+github_url: socialLinks.github,
+reflectly_url: socialLinks.reflectly,
 }).eq('id', userId);
 if (updateError) {
 setProfileError('Failed to update profile: ' + updateError.message);
@@ -142,7 +155,33 @@ function handleCancelEdit() {
 setEditMode(false);
 setNewAvatarFile(null);
 setNewHeaderFile(null);
-// Optionally, refetch profile to reset fields
+setProfileError(null);
+// Refetch profile to reset all fields including social links
+async function refetchProfile() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("avatar_url, header_url, full_name, bio, phone, facebook_url, instagram_url, twitter_url, github_url, reflectly_url")
+      .eq("id", user.id)
+      .single();
+    if (profile) {
+      setAvatar(profile.avatar_url || "/default-avatar.png");
+      setHeader(profile.header_url || "/default-header.jpg");
+      setName(profile.full_name || "Your Name");
+      setBio(profile.bio || "Short bio goes here...");
+      setPhone(profile.phone || "");
+      setSocialLinks({
+        facebook: profile.facebook_url || '',
+        instagram: profile.instagram_url || '',
+        twitter: profile.twitter_url || '',
+        github: profile.github_url || '',
+        reflectly: profile.reflectly_url || ''
+      });
+    }
+  }
+}
+refetchProfile();
 }
 
   // Handler for Delete Account (placeholder)
@@ -324,19 +363,33 @@ return (
     </div>
     {/* Save/Cancel Buttons in Edit Mode */}
     {editMode && (
-      <div className="flex gap-4 mt-4">
-        <button
-          onClick={() => setEditMode(false)}
-          className={`px-6 py-2 rounded-full font-bold shadow transition-all duration-300 ${darkMode ? 'bg-[#23234a] text-[#A09ABC] hover:bg-[#23234a]/80' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => setEditMode(false)}
-          className={`px-6 py-2 rounded-full font-bold shadow transition-all duration-300 ${darkMode ? 'bg-gradient-to-r from-[#A09ABC] to-[#6C63A6] text-white hover:from-[#6C63A6] hover:to-[#A09ABC]' : 'bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white hover:from-[#B6A6CA] hover:to-[#A09ABC]'}`}
-        >
-          Save
-        </button>
+      <div className="flex flex-col gap-4 mt-4">
+        {/* Error/Success Messages */}
+        {profileError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-center text-sm">
+            {profileError}
+          </div>
+        )}
+        {profileSuccess && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-center text-sm">
+            Profile updated successfully!
+          </div>
+        )}
+        <div className="flex gap-4">
+          <button
+            onClick={handleCancelEdit}
+            className={`px-6 py-2 rounded-full font-bold shadow transition-all duration-300 ${darkMode ? 'bg-[#23234a] text-[#A09ABC] hover:bg-[#23234a]/80' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleProfileSave}
+            disabled={profileLoading}
+            className={`px-6 py-2 rounded-full font-bold shadow transition-all duration-300 ${darkMode ? 'bg-gradient-to-r from-[#A09ABC] to-[#6C63A6] text-white hover:from-[#6C63A6] hover:to-[#A09ABC]' : 'bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white hover:from-[#B6A6CA] hover:to-[#A09ABC]'}`}
+          >
+            {profileLoading ? 'Saving...' : 'Save'}
+          </button>
+        </div>
       </div>
     )}
     {/* Delete Account Section */}

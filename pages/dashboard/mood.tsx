@@ -90,7 +90,7 @@ export default function MoodTracker() {
       router.push("/auth/login");
       return;
     }
-    await supabase.from("moods").insert([{ user_id: user.id, emoji: selectedMood }]);
+    await supabase.from("moods").insert([{ user_id: user.id, emoji: selectedMood, created_at: new Date().toISOString() }]);
     setShowAdvice(true);
     setSelectedMood("");
     fetchMoodData();

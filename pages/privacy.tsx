@@ -5,7 +5,7 @@ const PrivacyPolicy = () => (
     <h1>Privacy Policy</h1>
     <p><strong>Last updated:</strong> July 7, 2025</p>
     <p>
-      ZAMDevs ("we", "our", or "us") operates the ZAMDevs app. This page informs you of our policies regarding the collection, use, and disclosure of personal information when you use our Service.
+      ZAMDevs (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) operates the ZAMDevs app. This page informs you of our policies regarding the collection, use, and disclosure of personal information when you use our Service.
     </p>
     <h2>Information Collection and Use</h2>
     <p>
@@ -13,7 +13,7 @@ const PrivacyPolicy = () => (
     </p>
     <h2>Log Data</h2>
     <p>
-      We may collect information that your browser sends whenever you visit our Service ("Log Data"). This Log Data may include information such as your computer's Internet Protocol ("IP") address, browser type, browser version, and the pages of our Service that you visit.
+      We may collect information that your browser sends whenever you visit our Service (&quot;Log Data&quot;). This Log Data may include information such as your computer&apos;s Internet Protocol (&quot;IP&quot;) address, browser type, browser version, and the pages of our Service that you visit.
     </p>
     <h2>Cookies</h2>
     <p>

@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import Sidebar from "../../components/Sidebar";
 import { useDarkMode } from "../../components/DarkModeContext";
-import { FaCog, FaPlus, FaUserCircle } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import Head from "next/head";
-import Link from "next/link";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 const STATUS_COLUMNS = [
@@ -76,14 +75,7 @@ export default function TaskPage() {
     setAdding(false);
   }
 
-  async function updateTaskStatus(id: string, status: string) {
-    setError(null);
-    const { error: updateError } = await supabase.from("tasks").update({ status }).eq("id", id);
-    if (updateError) {
-      setError("Failed to update task status: " + updateError.message);
-    }
-    fetchTasks();
-  }
+  
 
   async function toggleTask(id: string, completed: boolean) {
     setError(null);

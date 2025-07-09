@@ -1,12 +1,11 @@
 import Head from "next/head";
 import { useState, useEffect } from "react";
-import { FaSmile, FaBook, FaTasks, FaChartBar, FaRss } from "react-icons/fa";
+import { FaBook, FaTasks, FaRss } from "react-icons/fa";
 import Sidebar from "../../components/Sidebar";
 import { supabase } from "../../lib/supabaseClient";
-import MoodCalendar from "../../components/MoodCalendar";
 import { useDarkMode } from "../../components/DarkModeContext";
 import { useRouter } from "next/router";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { TooltipProps } from 'recharts';
 import React from 'react';
 
@@ -17,8 +16,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { darkMode } = useDarkMode();
-  const [showNamePrompt, setShowNamePrompt] = useState(false);
-
   // Add missing state variables
   const [recentMood, setRecentMood] = useState<any>(null);
   const [recentJournal, setRecentJournal] = useState<any>(null);
@@ -27,11 +24,7 @@ export default function Dashboard() {
 
   // Add missing state and constants for dashboard functionality
   const [streak, setStreak] = useState(0);
-  const [entriesThisMonth, setEntriesThisMonth] = useState(0);
-  const [mostCommonMood, setMostCommonMood] = useState("");
-  const [weeklyCount, setWeeklyCount] = useState(0);
-  const [quote, setQuote] = useState("");
-  const [showConfetti, setShowConfetti] = useState(false);
+
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDate, setModalDate] = useState("");
@@ -488,18 +481,28 @@ export default function Dashboard() {
                   Update Mood
                 </button>
               </div>
-              {/* Mood Consistency with line chart */}
+              {/* Mood Consistency with area chart (analytics style) */}
               <div className="rounded-2xl bg-white/60 dark:bg-[#23234a] shadow p-6 flex flex-col items-center justify-center backdrop-blur-md border border-white/30 dark:border-[#23234a]">
                 <div className="text-lg font-semibold text-[#6C63A6] mb-2">Mood Consistency</div>
                 <ResponsiveContainer width="100%" height={140}>
-                  <LineChart data={moodChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <AreaChart data={moodChartData || []} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="lightPurple" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#B6A6CA" stopOpacity={0.7} />
+                        <stop offset="100%" stopColor="#E1D8E9" stopOpacity={0.2} />
+                      </linearGradient>
+                      <linearGradient id="darkPurple" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#6C3483" stopOpacity={0.8} />
+                        <stop offset="100%" stopColor="#23234a" stopOpacity={0.2} />
+                      </linearGradient>
+                    </defs>
                     <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#A09ABC' }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 12, fill: '#A09ABC' }} domain={[1, 5]} axisLine={false} tickLine={false} allowDecimals={false} />
                     <Tooltip content={<CustomTooltip />} labelStyle={{ color: '#6C63A6' }} />
                     <Legend verticalAlign="top" height={24} iconType="circle" wrapperStyle={{ color: '#A09ABC', fontWeight: 600, fontSize: 15 }} />
-                    <Line type="monotone" dataKey="entries" stroke="#6C63A6" strokeWidth={3} dot={{ r: 7, fill: '#6C63A6', stroke: '#fff', strokeWidth: 2 }} name="entries" />
-                    <Line type="monotone" dataKey="moods" stroke="#B6A6CA" strokeWidth={3} dot={{ r: 7, fill: '#B6A6CA', stroke: '#fff', strokeWidth: 2 }} name="moods" />
-                  </LineChart>
+                    <Area type="monotone" dataKey="entries" stroke="#6C3483" fill="url(#darkPurple)" strokeWidth={3} dot={{ r: 4, fill: '#6C3483' }} activeDot={{ r: 7, fill: '#6C3483' }} name="entries" />
+                    <Area type="monotone" dataKey="moods" stroke="#8B7BB9" fill="url(#lightPurple)" strokeWidth={3} dot={{ r: 4, fill: '#8B7BB9' }} activeDot={{ r: 7, fill: '#8B7BB9' }} name="moods" />
+                  </AreaChart>
                 </ResponsiveContainer>
                 <button onClick={handleViewTrends} className="mt-4 bg-[#B6A6CA] text-white px-5 py-2 rounded-lg font-bold shadow hover:bg-[#A09ABC] transition">
                   View Trends

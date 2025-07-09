@@ -4,14 +4,6 @@ import Sidebar from "../../components/Sidebar";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useDarkMode } from "../../components/DarkModeContext";
-import {
-BarChart,
-Bar,
-XAxis,
-YAxis,
-Tooltip,
-ResponsiveContainer,
-} from "recharts";
 
 const moods = [
 ["😄", "🙂", "😐", "😔", "😢"],

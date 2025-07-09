@@ -73,7 +73,7 @@ export default function MoodCalendar() {
           <div style={{ background: '#fff', borderRadius: 16, padding: 32, minWidth: 260, boxShadow: '0 4px 24px #D5CFE1', color: palette.purple, position: 'relative' }} onClick={e => e.stopPropagation()}>
             <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Day {selectedDay}</div>
             <div style={{ fontSize: 32 }}>{getMoodForDay(selectedDay).emoji}</div>
-            <div style={{ color: palette.lilac, marginTop: 12 }}>"Sample journal entry for day {selectedDay}."</div>
+            <div style={{ color: palette.lilac, marginTop: 12 }}>&quot;Sample journal entry for day {selectedDay}.&quot;</div>
             <button style={{ position: 'absolute', top: 10, right: 16, background: 'none', border: 'none', fontSize: 20, color: palette.purple, cursor: 'pointer' }} onClick={() => setSelectedDay(null)}>&times;</button>
           </div>
         </div>

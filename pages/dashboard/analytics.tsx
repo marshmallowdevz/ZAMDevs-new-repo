@@ -7,15 +7,10 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useDarkMode } from "../../components/DarkModeContext";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid,
   ResponsiveContainer,
-  ComposedChart,
-  Bar,
   Legend,
   Area,
   AreaChart,

@@ -7,6 +7,7 @@ import { TransitionContext } from "../_app";
 import { useDarkMode } from "../../components/DarkModeContext";
 import { v4 as uuidv4 } from 'uuid';
 import { FaCamera } from 'react-icons/fa';
+import { useRouter } from 'next/router';
 
 type JournalEntry = {
 id: string;
@@ -46,22 +47,42 @@ const [socialLinks, setSocialLinks] = useState({
 });
 // Add state for delete modal
 const [showDeleteModal, setShowDeleteModal] = useState(false);
+const router = useRouter();
+const profileUserId = router.query.id as string | undefined; // The user whose profile is being viewed
+const [friendsList, setFriendsList] = useState<{ id: string, full_name: string, avatar_url: string }[]>([]);
+const [showNotification, setShowNotification] = useState(false);
+const [notificationType, setNotificationType] = useState<'success' | 'error' | null>(null);
+const [notificationMsg, setNotificationMsg] = useState('');
 
 useEffect(() => {
 setTimeout(() => setShowText(true), 100);
 }, []);
+
+// Show notification when profileSuccess or profileError changes
+useEffect(() => {
+  if (profileSuccess) {
+    setNotificationType('success');
+    setNotificationMsg('Profile updated successfully!');
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 2500);
+  } else if (profileError) {
+    setNotificationType('error');
+    setNotificationMsg(profileError);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3500);
+  }
+}, [profileSuccess, profileError]);
 
 // Fetch user info and profile images
 useEffect(() => {
 async function fetchProfile() {
 const { data: { user } } = await supabase.auth.getUser();
 if (user) {
-setEmail(user.email || "");
 setUserId(user.id);
 // Fetch profile from your 'profiles' table
 const { data: profile } = await supabase
 .from("profiles")
-.select("avatar_url, header_url, full_name, bio, phone, facebook_url, instagram_url, twitter_url, github_url, reflectly_url")
+.select("avatar_url, header_url, full_name, bio, phone, facebook_url, instagram_url, twitter_url, github_url, reflectly_url, display_email")
 .eq("id", user.id)
 .single();
 if (profile) {
@@ -70,6 +91,8 @@ setHeader(profile.header_url || "/default-header.jpg");
 setName(profile.full_name || "Your Name");
 setBio(profile.bio || "Short bio goes here...");
 setPhone(profile.phone || "");
+// Use display_email from profile if available, otherwise use auth email
+setEmail(profile.display_email !== null ? profile.display_email : (user.email || ""));
 // Set social links from database
 setSocialLinks({
   facebook: profile.facebook_url || '',
@@ -78,6 +101,9 @@ setSocialLinks({
   github: profile.github_url || '',
   reflectly: profile.reflectly_url || ''
 });
+} else {
+// If no profile exists, use auth email
+setEmail(user.email || "");
 }
 // Fetch journal entries
 const { data: journals } = await supabase
@@ -90,6 +116,31 @@ setJournalEntries(journals || []);
 }
 fetchProfile();
 }, []);
+
+// Fetch friends list for the profile being viewed
+useEffect(() => {
+  async function fetchFriendsList() {
+    const targetId = profileUserId || userId;
+    if (!targetId) return;
+    // Get all friend IDs where user is targetId
+    const { data: friendLinks } = await supabase
+      .from('friends')
+      .select('friend_id')
+      .eq('user_id', targetId);
+    if (!friendLinks || friendLinks.length === 0) {
+      setFriendsList([]);
+      return;
+    }
+    const friendIds = friendLinks.map(f => f.friend_id);
+    // Fetch profile info for all friends
+    const { data: friendProfiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url')
+      .in('id', friendIds);
+    setFriendsList(friendProfiles || []);
+  }
+  fetchFriendsList();
+}, [profileUserId, userId]);
 
 async function handleProfileSave() {
 if (!userId) return;
@@ -128,6 +179,7 @@ const { error: updateError } = await supabase.from('profiles').update({
 full_name: name,
 bio,
 phone,
+display_email: email,
 avatar_url: avatarUrl,
 header_url: headerUrl,
 facebook_url: socialLinks.facebook,
@@ -149,39 +201,6 @@ setEditMode(false);
 setNewAvatarFile(null);
 setNewHeaderFile(null);
 setTimeout(() => setProfileSuccess(false), 3000);
-}
-
-function handleCancelEdit() {
-setEditMode(false);
-setNewAvatarFile(null);
-setNewHeaderFile(null);
-setProfileError(null);
-// Refetch profile to reset all fields including social links
-async function refetchProfile() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("avatar_url, header_url, full_name, bio, phone, facebook_url, instagram_url, twitter_url, github_url, reflectly_url")
-      .eq("id", user.id)
-      .single();
-    if (profile) {
-      setAvatar(profile.avatar_url || "/default-avatar.png");
-      setHeader(profile.header_url || "/default-header.jpg");
-      setName(profile.full_name || "Your Name");
-      setBio(profile.bio || "Short bio goes here...");
-      setPhone(profile.phone || "");
-      setSocialLinks({
-        facebook: profile.facebook_url || '',
-        instagram: profile.instagram_url || '',
-        twitter: profile.twitter_url || '',
-        github: profile.github_url || '',
-        reflectly: profile.reflectly_url || ''
-      });
-    }
-  }
-}
-refetchProfile();
 }
 
   // Handler for Delete Account (placeholder)
@@ -392,6 +411,28 @@ return (
         </div>
       </div>
     )}
+    {/* Friends List Section */}
+    <div className="w-full flex flex-col items-center mb-8">
+      <div className={`text-lg font-bold mb-4 ${darkMode ? 'text-[#A09ABC]' : 'text-gray-700'}`}>Friends</div>
+      {friendsList.length === 0 ? (
+        <div className="text-center text-sm opacity-60">No friends yet.</div>
+      ) : (
+        <div className="flex flex-wrap gap-4 justify-center">
+          {friendsList.map(friend => (
+            <div key={friend.id} className="flex flex-col items-center w-20">
+              <Image
+                src={friend.avatar_url || '/default-avatar.png'}
+                alt={friend.full_name || 'Friend'}
+                width={48}
+                height={48}
+                className="rounded-full shadow"
+              />
+              <div className="text-xs text-center mt-1 truncate w-full" title={friend.full_name}>{friend.full_name || 'No Name'}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
     {/* Delete Account Section */}
     <div className="w-full flex flex-col items-center border-t border-gray-300 pt-6 mt-2">
       <button
@@ -432,6 +473,19 @@ return (
       </div>
     )}
   </div>
+  {/* Aesthetic Notification */}
+  {showNotification && (
+    <div className={`fixed top-6 left-1/2 z-50 -translate-x-1/2 px-6 py-4 min-w-[280px] max-w-xs flex items-center gap-3 rounded-xl shadow-lg transition-all duration-500
+      ${notificationType === 'success' ? 'bg-green-50 border border-green-300 text-green-800' : 'bg-red-50 border border-red-300 text-red-800'}
+      animate-fade-in-out`}
+      style={{animation: 'fadeInOut 2.5s'}}
+    >
+      <span className="text-2xl">
+        {notificationType === 'success' ? '✓' : '⚠️'}
+      </span>
+      <span className="font-medium text-sm break-words">{notificationMsg}</span>
+    </div>
+  )}
 </main>
 </div>
 );

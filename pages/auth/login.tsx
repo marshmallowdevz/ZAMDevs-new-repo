@@ -112,6 +112,9 @@ export default function Login() {
             <input id="email" name="email" type="email" required value={email} onChange={e => setEmail(e.target.value)} className="p-1 md:p-2 rounded-lg border border-[#D5CFE1] bg-white/80 text-[#6C63A6] text-xs md:text-sm placeholder-[#A09ABC] focus:outline-none focus:ring-2 focus:ring-[#A09ABC] transition-all duration-200 hover:shadow-lg w-full" />
             <label htmlFor="password" className="text-[#6C63A6] font-semibold text-xs md:text-sm mt-1">Password</label>
             <input id="password" name="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} className="p-1 md:p-2 rounded-lg border border-[#D5CFE1] bg-white/80 text-[#6C63A6] text-xs md:text-sm placeholder-[#A09ABC] focus:outline-none focus:ring-2 focus:ring-[#A09ABC] transition-all duration-200 hover:shadow-lg w-full" />
+            <div className="text-right mt-1 mb-1">
+              <Link href="/auth/forgot-password" className="text-xs text-[#A09ABC] underline hover:text-[#6C63A6] transition">Forgot Password?</Link>
+            </div>
             <button type="submit" className="mt-2 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-base md:text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 hover:shadow-xl w-full">Login</button>
           </form>
           <div className="text-center text-[#6C63A6] mt-1 text-xs md:text-sm">

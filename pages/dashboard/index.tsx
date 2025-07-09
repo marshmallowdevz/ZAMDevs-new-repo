@@ -23,18 +23,7 @@ export default function Dashboard() {
   // Add missing state and constants for dashboard functionality
   const [streak, setStreak] = useState(0);
 
-  // Add dummy data for mood consistency chart
-  const [moodChartData] = useState([
-    { date: '6/30/2025', entries: 4, moods: 2 },
-    { date: '7/1/2025', entries: 2, moods: 1 },
-    { date: '7/2/2025', entries: 3, moods: 2 },
-    { date: '7/3/2025', entries: 1, moods: 1 },
-    { date: '7/4/2025', entries: 2, moods: 2 },
-    { date: '7/5/2025', entries: 3, moods: 3 },
-    { date: '7/6/2025', entries: 4, moods: 4 },
-  ]);
 
-  // Add dummy data for mood consistency chart
   const [moodChartData] = useState([
     { date: '6/30/2025', entries: 4, moods: 2 },
     { date: '7/1/2025', entries: 2, moods: 1 },

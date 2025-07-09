@@ -1,12 +1,11 @@
 import Head from "next/head";
 import { useState, useEffect } from "react";
-import { FaSmile, FaBook, FaTasks, FaChartBar, FaRss } from "react-icons/fa";
+import { FaBook, FaTasks, FaRss } from "react-icons/fa";
 import Sidebar from "../../components/Sidebar";
 import { supabase } from "../../lib/supabaseClient";
-import MoodCalendar from "../../components/MoodCalendar";
 import { useDarkMode } from "../../components/DarkModeContext";
 import { useRouter } from "next/router";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(true);
@@ -15,8 +14,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { darkMode } = useDarkMode();
-  const [showNamePrompt, setShowNamePrompt] = useState(false);
-
   // Add missing state variables
   const [recentMood, setRecentMood] = useState<any>(null);
   const [recentJournal, setRecentJournal] = useState<any>(null);
@@ -25,11 +22,28 @@ export default function Dashboard() {
 
   // Add missing state and constants for dashboard functionality
   const [streak, setStreak] = useState(0);
-  const [entriesThisMonth, setEntriesThisMonth] = useState(0);
-  const [mostCommonMood, setMostCommonMood] = useState("");
-  const [weeklyCount, setWeeklyCount] = useState(0);
-  const [quote, setQuote] = useState("");
-  const [showConfetti, setShowConfetti] = useState(false);
+
+  // Add dummy data for mood consistency chart
+  const [moodChartData] = useState([
+    { date: '6/30/2025', entries: 4, moods: 2 },
+    { date: '7/1/2025', entries: 2, moods: 1 },
+    { date: '7/2/2025', entries: 3, moods: 2 },
+    { date: '7/3/2025', entries: 1, moods: 1 },
+    { date: '7/4/2025', entries: 2, moods: 2 },
+    { date: '7/5/2025', entries: 3, moods: 3 },
+    { date: '7/6/2025', entries: 4, moods: 4 },
+  ]);
+
+  // Add dummy data for mood consistency chart
+  const [moodChartData] = useState([
+    { date: '6/30/2025', entries: 4, moods: 2 },
+    { date: '7/1/2025', entries: 2, moods: 1 },
+    { date: '7/2/2025', entries: 3, moods: 2 },
+    { date: '7/3/2025', entries: 1, moods: 1 },
+    { date: '7/4/2025', entries: 2, moods: 2 },
+    { date: '7/5/2025', entries: 3, moods: 3 },
+    { date: '7/6/2025', entries: 4, moods: 4 },
+  ]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDate, setModalDate] = useState("");
@@ -186,57 +200,17 @@ export default function Dashboard() {
     setRecentTask(tasks && tasks[0]);
   }
 
-  // Demo data for UI
-  const today = new Date();
-  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-  const calendar = Array.from({ length: daysInMonth }, (_, i) => ({
-    day: i + 1,
-    emoji: '😊',
-  }));
+
   // Fetch moods for the current month
   useEffect(() => {
     // Set mock data for now
     setStreak(5);
-    setEntriesThisMonth(12);
-    setMostCommonMood("😊");
-    setWeeklyCount(3);
-    setQuote(
-      motivationalQuotes[
-        Math.floor(Math.random() * motivationalQuotes.length)
-      ]
-    );
 
     // Fetch recent activity
     fetchRecentActivity();
+  }, []);
 
-    if (streak && streak % 7 === 0) {
-      setShowConfetti(true);
-      import("canvas-confetti").then((module) => {
-        module.default({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-      });
 
-      const timer = setTimeout(() => {
-        setShowConfetti(false);
-      }, 2000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [streak]);
-
-  // Add dummy data for mood consistency chart
-  const [moodChartData, setMoodChartData] = useState([
-    { date: '6/30/2025', entries: 4, moods: 2 },
-    { date: '7/1/2025', entries: 2, moods: 1 },
-    { date: '7/2/2025', entries: 3, moods: 2 },
-    { date: '7/3/2025', entries: 1, moods: 1 },
-    { date: '7/4/2025', entries: 2, moods: 2 },
-    { date: '7/5/2025', entries: 3, moods: 3 },
-    { date: '7/6/2025', entries: 4, moods: 4 },
-  ]);
 
   // Button Actions
   const handleUpdateMood = () => {
@@ -332,10 +306,10 @@ export default function Dashboard() {
   const firstDayOfWeek = new Date(Date.UTC(utcYear, utcMonth, 1)).getUTCDay();
   // Mood Calendar grid logic
   const calendarCells = [];
-  for (let i = 0; i < daysInMonth; i++) {
+  for (let i = 0; i < daysInMonthUTC; i++) {
     const day = i - firstDayOfWeek + 1;
-    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    if (i < firstDayOfWeek || day > daysInMonth) {
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    if (i < firstDayOfWeek || day > daysInMonthUTC) {
       calendarCells.push(<div key={`empty-${i}`}></div>);
     } else {
       const emoji = monthlyMoods[dateStr] || "😊";
@@ -354,7 +328,7 @@ export default function Dashboard() {
   }
 
   // Calculate mood consistency for the current month
-  const daysInCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const daysInCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const daysWithMood = Object.keys(monthlyMoods).length;
   const moodConsistency = daysInCurrentMonth > 0 ? Math.round((daysWithMood / daysInCurrentMonth) * 100) : 0;
 
@@ -399,7 +373,7 @@ export default function Dashboard() {
               {/* Mood Calendar */}
               <div className="rounded-2xl bg-white/60 dark:bg-[#23234a] shadow p-6 backdrop-blur-md border border-white/30 dark:border-[#23234a] col-span-1">
                 <h3 className="text-xl font-bold text-[#A09ABC] mb-4">Mood Calendar</h3>
-                <div className="text-center text-[#6C63A6] font-semibold mb-2">{today.toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
+                <div className="text-center text-[#6C63A6] font-semibold mb-2">{now.toLocaleString('default', { month: 'long', year: 'numeric' })}</div>
                 <div className="grid grid-cols-7 gap-2">
                   {[...Array(7)].map((_, i) => (
                     <div key={i} className="text-xs text-[#A09ABC] font-bold text-center">
@@ -426,18 +400,28 @@ export default function Dashboard() {
                   Update Mood
                 </button>
               </div>
-              {/* Mood Consistency with line chart */}
+              {/* Mood Consistency with area chart (analytics style) */}
               <div className="rounded-2xl bg-white/60 dark:bg-[#23234a] shadow p-6 flex flex-col items-center justify-center backdrop-blur-md border border-white/30 dark:border-[#23234a]">
                 <div className="text-lg font-semibold text-[#6C63A6] mb-2">Mood Consistency</div>
                 <ResponsiveContainer width="100%" height={140}>
-                  <LineChart data={moodChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <AreaChart data={moodChartData || []} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="lightPurple" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#B6A6CA" stopOpacity={0.7} />
+                        <stop offset="100%" stopColor="#E1D8E9" stopOpacity={0.2} />
+                      </linearGradient>
+                      <linearGradient id="darkPurple" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#6C3483" stopOpacity={0.8} />
+                        <stop offset="100%" stopColor="#23234a" stopOpacity={0.2} />
+                      </linearGradient>
+                    </defs>
                     <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#A09ABC' }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 12, fill: '#A09ABC' }} domain={[0, 'dataMax+1']} axisLine={false} tickLine={false} allowDecimals={false} />
                     <Tooltip contentStyle={{ background: '#fff', borderRadius: 8, border: 'none', boxShadow: '0 2px 8px #A09ABC22' }} labelStyle={{ color: '#6C63A6' }} />
                     <Legend verticalAlign="top" height={24} iconType="circle" wrapperStyle={{ color: '#A09ABC', fontWeight: 600, fontSize: 15 }} />
-                    <Line type="monotone" dataKey="entries" stroke="#6C63A6" strokeWidth={3} dot={{ r: 7, fill: '#6C63A6', stroke: '#fff', strokeWidth: 2 }} name="entries" />
-                    <Line type="monotone" dataKey="moods" stroke="#B6A6CA" strokeWidth={3} dot={{ r: 7, fill: '#B6A6CA', stroke: '#fff', strokeWidth: 2 }} name="moods" />
-                  </LineChart>
+                    <Area type="monotone" dataKey="entries" stroke="#6C3483" fill="url(#darkPurple)" strokeWidth={3} dot={{ r: 4, fill: '#6C3483' }} activeDot={{ r: 7, fill: '#6C3483' }} name="entries" />
+                    <Area type="monotone" dataKey="moods" stroke="#8B7BB9" fill="url(#lightPurple)" strokeWidth={3} dot={{ r: 4, fill: '#8B7BB9' }} activeDot={{ r: 7, fill: '#8B7BB9' }} name="moods" />
+                  </AreaChart>
                 </ResponsiveContainer>
                 <button onClick={handleViewTrends} className="mt-4 bg-[#B6A6CA] text-white px-5 py-2 rounded-lg font-bold shadow hover:bg-[#A09ABC] transition">
                   View Trends

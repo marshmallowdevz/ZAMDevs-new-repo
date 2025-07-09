@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import Sidebar from "../../components/Sidebar";
 import { useDarkMode } from "../../components/DarkModeContext";
-import { FaCog, FaPlus, FaUserCircle } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import Head from "next/head";
-import Link from "next/link";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 const STATUS_COLUMNS = [

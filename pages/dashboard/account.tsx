@@ -1,12 +1,10 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { supabase } from "../../lib/supabaseClient";
 import Sidebar from "../../components/Sidebar";
 import Head from "next/head";
-import { TransitionContext } from "../_app";
 import { useDarkMode } from "../../components/DarkModeContext";
 import { v4 as uuidv4 } from 'uuid';
-import { FaCamera } from 'react-icons/fa';
 import { useRouter } from 'next/router';
 
 type JournalEntry = {
@@ -29,7 +27,6 @@ const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
 const [userId, setUserId] = useState<string | null>(null);
 const [collapsed, setCollapsed] = useState(false);
 const [showText, setShowText] = useState(false);
-const { showContent } = useContext(TransitionContext);
 const [profileLoading, setProfileLoading] = useState(false);
 const [profileSuccess, setProfileSuccess] = useState(false);
 const { darkMode } = useDarkMode();
@@ -48,7 +45,6 @@ const [socialLinks, setSocialLinks] = useState({
 // Add state for delete modal
 const [showDeleteModal, setShowDeleteModal] = useState(false);
 const router = useRouter();
-const profileUserId = router.query.id as string | undefined; // The user whose profile is being viewed
 const [showNotification, setShowNotification] = useState(false);
 const [notificationType, setNotificationType] = useState<'success' | 'error' | null>(null);
 const [notificationMsg, setNotificationMsg] = useState('');
@@ -187,11 +183,7 @@ setTimeout(() => setProfileSuccess(false), 3000);
     }
   };
 
-  // Handler for Change Password (placeholder)
-  const handleChangePassword = () => {
-    // TODO: Add backend logic for password change
-    alert("Change password is not implemented yet.");
-  };
+
 
 function handleCancelEdit() {
   setEditMode(false);

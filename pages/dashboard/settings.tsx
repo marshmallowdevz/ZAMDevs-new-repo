@@ -4,11 +4,10 @@ import { supabase } from "../../lib/supabaseClient";
 import Sidebar from "../../components/Sidebar";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import Link from "next/link";
 import {
   FaMoon, FaPalette, FaGlobe, FaBell,
   FaLock, FaInfoCircle, FaQuestionCircle,
-  FaChevronDown, FaChevronUp, FaStar, FaShareAlt, FaFileAlt, FaFileContract, FaCookieBite, FaCommentDots, FaSignOutAlt
+  FaStar, FaShareAlt, FaFileAlt, FaFileContract, FaCookieBite, FaCommentDots, FaSignOutAlt
 } from "react-icons/fa";
 import { useDarkMode } from "../../components/DarkModeContext";
 import LegalModal from "../../components/LegalModal";
@@ -82,7 +81,6 @@ export default function Settings() {
   const [collapsed, setCollapsed] = useState(true);
   const [loading, setLoading] = useState(true);
   const { darkMode, setDarkMode } = useDarkMode();
-  const [expanded, setExpanded] = useState<string | null>(null);
   const [language, setLanguage] = useState('English');
   const [notifications, setNotifications] = useState(true);
   const [modal, setModal] = useState<{title: string, content: React.ReactNode} | null>(null);
@@ -133,9 +131,7 @@ export default function Settings() {
     );
   }
 
-  function setShowLogoutModal(arg0: boolean): void {
-    throw new Error("Function not implemented.");
-  }
+
 
   return (
     <>

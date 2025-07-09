@@ -1,9 +1,7 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../../lib/supabaseClient";
-import Image from "next/image";
 import Head from "next/head";
-import { TransitionContext } from "../_app";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -20,19 +18,13 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [show, setShow] = useState(false);
   const router = useRouter();
-  const [showText, setShowText] = useState(false);
-  const { showContent } = useContext(TransitionContext);
-  const [confirmationMsg, setConfirmationMsg] = useState("");
 
   useEffect(() => {
-    setTimeout(() => setShowText(true), 100);
     // Check for confirmation in URL (Supabase may use hash or query)
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('confirmed') === 'true' || window.location.hash.includes('access_token')) {
-        setConfirmationMsg("Email confirmed! Please log in.");
         // Optionally, clean up the URL
         window.history.replaceState({}, document.title, window.location.pathname);
       }
@@ -115,7 +107,7 @@ export default function Login() {
             <button type="submit" className="mt-2 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-[#A09ABC] to-[#B6A6CA] text-white font-bold text-base md:text-lg shadow hover:from-[#B6A6CA] hover:to-[#A09ABC] transition-all duration-300 hover:shadow-xl w-full">Login</button>
           </form>
           <div className="text-center text-[#6C63A6] mt-1 text-xs md:text-sm">
-            Don't have an account? <Link href="/auth/signup" className="underline text-[#A09ABC] font-semibold">Sign Up</Link>
+            Don&apos;t have an account? <Link href="/auth/signup" className="underline text-[#A09ABC] font-semibold">Sign Up</Link>
           </div>
           {error && <div className="text-red-500 text-center mt-1 text-xs md:text-sm">{error}</div>}
         </div>

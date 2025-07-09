@@ -128,3 +128,13 @@ a {
   background-size: 200% 200%;
   animation: gradient-bg 12s ease-in-out infinite;
 }
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  10% { opacity: 1; transform: translateY(0) scale(1); }
+  90% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-20px) scale(0.95); }
+}
+.animate-fade-in-out {
+  animation: fadeInOut 2.5s both;
+}

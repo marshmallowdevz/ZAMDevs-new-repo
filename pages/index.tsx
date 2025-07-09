@@ -290,7 +290,7 @@ function FeatureToggle({ nextSlide, prevSlide }: { nextSlide: () => void; prevSl
         <li>📅 <b>Calendar View:</b> Interactive calendar for mood and entry history tracking</li>
         <li>🌗 <b>Minimalist UI:</b> Light and dark mode options for every mood</li>
         <li>⏰ <b>Smart Reminders:</b> Encourages consistent journaling habits</li>
-        <li>📎 <b>Media Attachments:</b> Add photos, audio, and more to your entries</li>
+        <li>📎 <b>Media Attachments:</b> Add photos, SocialLinks, and more to your entries</li>
         <li>📡 <b>Offline Access:</b> Journal anywhere, anytime—no internet needed</li>
         <li>⏳ <b>Time Capsule:</b> Schedule future resurfacing of special entries</li>
         <li>🔗 <b>Cross-Platform Sync:</b> Seamless access on web, and desktop</li>

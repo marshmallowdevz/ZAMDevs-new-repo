@@ -34,6 +34,29 @@ user_id?: string;
   const [collapsed, setCollapsed] = useState(true);
   const router = useRouter();
   const { darkMode } = useDarkMode();
+  const [showAdvice, setShowAdvice] = useState(false);
+  const moodAdvice: { [emoji: string]: string } = {
+    "😄": "Keep smiling!",
+    "🙂": "Stay positive!",
+    "😐": "It's okay to feel neutral.",
+    "😔": "Take some time for yourself.",
+    "😢": "It's okay to cry. Reach out if you need support.",
+    "😡": "Try some deep breaths.",
+    "😱": "Take a moment to calm down.",
+    "😴": "Rest is important!",
+    "🤩": "Enjoy the excitement!",
+    "😇": "Spread your kindness!",
+    "😂": "Laughter is the best medicine!",
+    "🥲": "Bittersweet moments are part of life.",
+    "😏": "Stay confident!",
+    "😬": "It's okay to feel awkward.",
+    "😭": "Let it out, you'll feel better.",
+    "😤": "Channel your energy positively!",
+    "😳": "It's okay to feel embarrassed.",
+    "🥳": "Celebrate your wins!",
+    "😎": "Keep up the cool vibes!",
+    "🥺": "Be gentle with yourself."
+  };
 
   // Change this variable to switch between horizontal and vertical layouts
   const layoutDirection = "flex-col gap-8"; // use "flex-row gap-12" for horizontal

@@ -75,14 +75,7 @@ export default function TaskPage() {
     setAdding(false);
   }
 
-  async function updateTaskStatus(id: string, status: string) {
-    setError(null);
-    const { error: updateError } = await supabase.from("tasks").update({ status }).eq("id", id);
-    if (updateError) {
-      setError("Failed to update task status: " + updateError.message);
-    }
-    fetchTasks();
-  }
+  
 
   async function toggleTask(id: string, completed: boolean) {
     setError(null);

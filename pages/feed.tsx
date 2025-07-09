@@ -58,7 +58,7 @@ export default function Feed() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'recent' | 'popular'>('all');
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
   const { darkMode } = useDarkMode();
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
@@ -157,7 +157,7 @@ export default function Feed() {
       if (!error && data) {
         // Group comments by entry_id
         const grouped: Record<string, Comment[]> = {};
-        data.forEach((c: any) => {
+        data.forEach((c: Comment) => {
           if (!grouped[c.entry_id]) grouped[c.entry_id] = [];
           grouped[c.entry_id].push(c);
         });

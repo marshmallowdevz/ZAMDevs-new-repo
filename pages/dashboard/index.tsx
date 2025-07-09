@@ -5,7 +5,7 @@ import Sidebar from "../../components/Sidebar";
 import { supabase } from "../../lib/supabaseClient";
 import { useDarkMode } from "../../components/DarkModeContext";
 import { useRouter } from "next/router";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { TooltipProps } from 'recharts';
 import React from 'react';
 

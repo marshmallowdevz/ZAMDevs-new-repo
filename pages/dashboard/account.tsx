@@ -23,10 +23,8 @@ const [name, setName] = useState("Your Name");
 const [bio, setBio] = useState("Short bio goes here...");
 const [email, setEmail] = useState("");
 const [phone, setPhone] = useState("");
-const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
 const [userId, setUserId] = useState<string | null>(null);
 const [collapsed, setCollapsed] = useState(false);
-const [showText, setShowText] = useState(false);
 const [profileLoading, setProfileLoading] = useState(false);
 const [profileSuccess, setProfileSuccess] = useState(false);
 const { darkMode } = useDarkMode();
@@ -49,9 +47,7 @@ const [showNotification, setShowNotification] = useState(false);
 const [notificationType, setNotificationType] = useState<'success' | 'error' | null>(null);
 const [notificationMsg, setNotificationMsg] = useState('');
 
-useEffect(() => {
-setTimeout(() => setShowText(true), 100);
-}, []);
+
 
 // Show notification when profileSuccess or profileError changes
 useEffect(() => {
@@ -100,13 +96,7 @@ setSocialLinks({
 // If no profile exists, use auth email
 setEmail(user.email || "");
 }
-// Fetch journal entries
-const { data: journals } = await supabase
-.from("journal")
-.select("*")
-.eq("user_id", user.id)
-.order("created_at", { ascending: false });
-setJournalEntries(journals || []);
+
 }
 }
 fetchProfile();

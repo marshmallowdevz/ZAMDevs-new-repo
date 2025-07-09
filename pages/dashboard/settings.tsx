@@ -11,8 +11,6 @@ import {
 } from "react-icons/fa";
 import { useDarkMode } from "../../components/DarkModeContext";
 import LegalModal from "../../components/LegalModal";
-import Terms from "../terms";
-import PrivacyPolicy from "../privacy";
 
 function Modal({ open, onClose, title, children }: { open: boolean, onClose: () => void, title: string, children: React.ReactNode }) {
   if (!open) return null;
@@ -81,7 +79,7 @@ export default function Settings() {
   const [collapsed, setCollapsed] = useState(true);
   const [loading, setLoading] = useState(true);
   const { darkMode, setDarkMode } = useDarkMode();
-  const [language, setLanguage] = useState('English');
+  
   const [notifications, setNotifications] = useState(true);
   const [modal, setModal] = useState<{title: string, content: React.ReactNode} | null>(null);
   const [feedbackSent, setFeedbackSent] = useState(false);
@@ -115,7 +113,7 @@ export default function Settings() {
 
   const preferences = [
     { icon: <FaPalette />, label: "Appearance" },
-    { icon: <FaGlobe />, label: "Language", note: language },
+    { icon: <FaGlobe />, label: "Language", note: "English" },
     { icon: <FaBell />, label: "Notifications", note: notifications ? 'On' : 'Off' },
     { icon: <FaLock />, label: "Privacy" },
     { icon: <FaLock />, label: "Security" },

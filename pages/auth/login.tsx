@@ -65,9 +65,7 @@ export default function Login() {
     }
   }
 
-  function handleSignup() {
-    router.push("/auth/signup");
-  }
+
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center relative overflow-hidden">

@@ -5,7 +5,9 @@ import Sidebar from "../../components/Sidebar";
 import { supabase } from "../../lib/supabaseClient";
 import { useDarkMode } from "../../components/DarkModeContext";
 import { useRouter } from "next/router";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
+import { TooltipProps } from 'recharts';
+import React from 'react';
 
 export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(true);
@@ -112,6 +114,14 @@ export default function Dashboard() {
     "😳": "Embarrassed"
   };
 
+  // Add mood score mapping for mood consistency chart
+  const moodScoreMap: { [key: string]: number } = {
+    "😁": 5, "🙂": 4, "😐": 3, "😔": 2, "😢": 1,
+    "😡": 1, "😴": 2, "😍": 5, "😇": 5, "😂": 5,
+    "😅": 4, "😉": 4, "😜": 4, "🥳": 5, "😎": 5,
+    "🥺": 2, "😭": 1, "😘": 5, "😳": 3
+  };
+
   // Add format time function
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -122,6 +132,36 @@ export default function Dashboard() {
     if (diffInHours < 24) return `${diffInHours}h ago`;
     if (diffInHours < 48) return "Yesterday";
     return date.toLocaleDateString();
+  };
+
+  // Add this function to calculate the streak
+  const calculateStreak = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    // Fetch all moods for the user, sorted by date descending
+    const { data: moods } = await supabase
+      .from("moods")
+      .select("created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    if (!moods || moods.length === 0) {
+      setStreak(0);
+      return;
+    }
+    // Build a set of unique dates with moods
+    const moodDates = new Set(moods.map((m: any) => m.created_at.split('T')[0]));
+    let streakCount = 0;
+    let current = new Date();
+    while (true) {
+      const dateStr = current.toISOString().split('T')[0];
+      if (moodDates.has(dateStr)) {
+        streakCount++;
+        current.setDate(current.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    setStreak(streakCount);
   };
 
   useEffect(() => {
@@ -189,113 +229,26 @@ export default function Dashboard() {
     setRecentTask(tasks && tasks[0]);
   }
 
-
-  // Fetch moods for the current month
+  // Replace the current useEffect for fetchMonthlyMoods with the following:
   useEffect(() => {
-    // Set mock data for now
-    setStreak(5);
-
-    // Fetch recent activity
+    fetchMonthlyMoods();
     fetchRecentActivity();
+    calculateStreak();
   }, []);
 
-
-
-  // Button Actions
-  const handleUpdateMood = () => {
-    setDashboardMoodModalOpen(true);
-  };
-  const handleViewTrends = () => {
-    router.push("/dashboard/analytics");
-  };
-  const handleNewEntry = () => {
-    router.push("/dashboard/journal");
-  };
-
-  // Modal handlers
-  const openMoodModal = (dateStr: string) => {
-    setModalDate(dateStr);
-    setModalMood(monthlyMoods[dateStr] || "");
-    setModalOpen(true);
-  };
-  const closeMoodModal = () => {
-    setModalOpen(false);
-    setModalDate("");
-    setModalMood("");
-  };
-  const saveMoodForDate = async () => {
-    if (!user || !modalDate || !modalMood) return;
-    // Remove any existing mood for this date
-    const start = modalDate + "T00:00:00.000Z";
-    const end = modalDate + "T23:59:59.999Z";
-    await supabase
-      .from("moods")
-      .delete()
-      .eq("user_id", user.id)
-      .gte("created_at", start)
-      .lte("created_at", end);
-    // Insert new mood
-    await supabase.from("moods").insert([
-      { user_id: user.id, emoji: modalMood, created_at: new Date(modalDate).toISOString() },
-    ]);
-    closeMoodModal();
-    fetchMonthlyMoods();
-    fetchRecentActivity(); // Ensure today's mood and recent activity update
-  };
-  const deleteMoodForDate = async () => {
-    if (!user || !modalDate) return;
-    const start = modalDate + "T00:00:00.000Z";
-    const end = modalDate + "T23:59:59.999Z";
-    await supabase
-      .from("moods")
-      .delete()
-      .eq("user_id", user.id)
-      .gte("created_at", start)
-      .lte("created_at", end);
-    closeMoodModal();
-    fetchMonthlyMoods();
-    fetchRecentActivity(); // Ensure today's mood and recent activity update
-  };
-
-  // Add save handler for dashboard mood modal
-  const handleSaveDashboardMood = async () => {
-    if (!user || !dashboardSelectedMood) return;
-    const todayStr = new Date().toISOString().split('T')[0];
-    // Remove any existing mood for today
-    await supabase
-      .from("moods")
-      .delete()
-      .eq("user_id", user.id)
-      .gte("created_at", todayStr + "T00:00:00.000Z")
-      .lte("created_at", todayStr + "T23:59:59.999Z");
-    // Insert new mood
-    await supabase.from("moods").insert([
-      { user_id: user.id, emoji: dashboardSelectedMood, created_at: new Date().toISOString() },
-    ]);
-    setDashboardMoodModalOpen(false);
-    setDashboardSelectedMood("");
-    await fetchMonthlyMoods();
-    await fetchRecentActivity(); // Ensure today's mood and recent activity update
-  };
-
-  if (loading) {
-    return (
-      <div className={`flex min-h-screen items-center justify-center ${darkMode ? 'bg-[#1a1a2e]' : 'bg-gradient-to-br from-[#E1D8E9] via-[#D5CFE1] to-[#B6A6CA]'}`}>
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#A09ABC]"></div>
-      </div>
-    );
-  }
+  // Add a new useEffect to sync todayMood and mood consistency chart whenever monthlyMoods changes
+  useEffect(() => {
+    fetchRecentActivity();
+    calculateStreak();
+  }, [monthlyMoods]);
 
   // Calendar logic
-  const now = new Date();
-  const utcYear = now.getUTCFullYear();
-  const utcMonth = now.getUTCMonth();
-  const utcDate = now.getUTCDate();
-  const daysInMonthUTC = new Date(utcYear, utcMonth + 1, 0).getUTCDate();
-  const firstDayOfWeek = new Date(Date.UTC(utcYear, utcMonth, 1)).getUTCDay();
-  // Mood Calendar grid logic
-  const calendarCells = [];
-  for (let i = 0; i < daysInMonthUTC; i++) {
+  const today = new Date();
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const firstDayOfWeek = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+  const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7;
+  const calendarCells: React.ReactNode[] = [];
+  for (let i = 0; i < totalCells; i++) {
     const day = i - firstDayOfWeek + 1;
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     if (i < firstDayOfWeek || day > daysInMonthUTC) {
@@ -320,6 +273,155 @@ export default function Dashboard() {
   const daysInCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const daysWithMood = Object.keys(monthlyMoods).length;
   const moodConsistency = daysInCurrentMonth > 0 ? Math.round((daysWithMood / daysInCurrentMonth) * 100) : 0;
+
+  // Ensure all handlers are defined before they are used in the JSX
+  const openMoodModal = (date: string) => {
+    setModalDate(date);
+    setModalMood("");
+    setModalOpen(true);
+  };
+
+  // 1. Make the 'Update Mood' button always open the emoji picker modal for today's date
+  const handleUpdateMood = () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    setModalDate(todayStr);
+    setModalMood(monthlyMoods[todayStr] || "");
+    setModalOpen(true);
+  };
+
+  const [showTrendsModal, setShowTrendsModal] = useState(false);
+
+  const handleViewTrends = () => {
+    setShowTrendsModal(true);
+  };
+
+  const handleNewEntry = () => {
+    router.push('/journal/new');
+  };
+
+  // 3. When a mood is saved or deleted, always call both fetchMonthlyMoods and fetchRecentActivity
+  const deleteMoodForDate = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const date = modalDate;
+    const { error } = await supabase
+      .from("moods")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("created_at", `${date}T00:00:00.000Z`);
+    if (error) {
+      console.error("Error deleting mood:", error);
+      return;
+    }
+    setMonthlyMoods(prev => {
+      const newState = { ...prev };
+      delete newState[date];
+      return newState;
+    });
+    await fetchMonthlyMoods();
+    await fetchRecentActivity();
+    await calculateStreak();
+    setModalOpen(false);
+  };
+
+  const closeMoodModal = () => {
+    setModalOpen(false);
+  };
+
+  // 2. Modal works for both calendar and today's mood, always showing all emoji (already handled by openMoodModal and handleUpdateMood)
+  const saveMoodForDate = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const date = modalDate;
+    const { error } = await supabase
+      .from("moods")
+      .upsert({
+        user_id: user.id,
+        emoji: modalMood,
+        created_at: `${date}T00:00:00.000Z`,
+      })
+      .eq("user_id", user.id)
+      .eq("created_at", `${date}T00:00:00.000Z`);
+    if (error) {
+      console.error("Error saving mood:", error);
+      return;
+    }
+    setMonthlyMoods(prev => ({ ...prev, [date]: modalMood }));
+    await fetchMonthlyMoods();
+    await fetchRecentActivity();
+    await calculateStreak();
+    setModalOpen(false);
+  };
+
+  const handleSaveDashboardMood = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const date = new Date().toISOString().split('T')[0];
+    const { error } = await supabase
+      .from("moods")
+      .upsert({
+        user_id: user.id,
+        emoji: dashboardSelectedMood,
+        created_at: `${date}T00:00:00.000Z`,
+      })
+      .eq("user_id", user.id)
+      .eq("created_at", `${date}T00:00:00.000Z`);
+    if (error) {
+      console.error("Error saving dashboard mood:", error);
+      return;
+    }
+    setMonthlyMoods(prev => ({ ...prev, [date]: dashboardSelectedMood }));
+    await fetchMonthlyMoods();
+    await fetchRecentActivity();
+    await calculateStreak();
+    setDashboardMoodModalOpen(false);
+  };
+
+  // 4. Mood Consistency chart uses real mood data for the current month
+  const moodChartData = Object.entries(monthlyMoods).map(([date, emoji]) => ({
+    date,
+    entries: 1,
+    moods: moodScoreMap[emoji] ?? 3, // Default to neutral if not found
+    label: moodLabelMap[emoji] || emoji,
+  }));
+
+  // In the chart, add a custom tooltip to show the mood label
+  const CustomTooltip = (props: TooltipProps<any, any>) => {
+    const { active, payload, label } = props as any;
+    if (active && payload && payload.length) {
+      return (
+        <div style={{ background: '#fff', borderRadius: 8, padding: 8, boxShadow: '0 2px 8px #A09ABC22', color: '#6C63A6' }}>
+          <div><b>{label}</b></div>
+          {payload.map((entry: any, idx: number) => (
+            <div key={idx} style={{ color: entry.color }}>{entry.name}: {entry.value}</div>
+          ))}
+          {payload[0] && payload[0].payload.label && (
+            <div style={{ marginTop: 4, fontStyle: 'italic', color: '#A09ABC' }}>Mood: {payload[0].payload.label}</div>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Update getMoodStats to return avg as a number and bestDay/worstDay as [string, string]
+  const getMoodStats = () => {
+    const scores = Object.values(monthlyMoods).map(emoji => moodScoreMap[emoji] ?? 3);
+    if (scores.length === 0) return null;
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const moodsArr = Object.values(monthlyMoods);
+    const freq = moodsArr.reduce((acc: Record<string, number>, m) => { acc[m] = (acc[m] || 0) + 1; return acc; }, {});
+    const mostCommon = Object.keys(freq).reduce((a, b) => freq[a] > freq[b] ? a : b, Object.keys(freq)[0] || "");
+    const entries = Object.entries(monthlyMoods);
+    const bestDayEntry = entries.length > 0 ? entries.reduce<[string, string]>((a, b) => (moodScoreMap[a[1]] > moodScoreMap[b[1]] ? a : b), entries[0]) : ["", ""];
+    const worstDayEntry = entries.length > 0 ? entries.reduce<[string, string]>((a, b) => (moodScoreMap[a[1]] < moodScoreMap[b[1]] ? a : b), entries[0]) : ["", ""];
+    return {
+      avg,
+      mostCommon,
+      bestDay: bestDayEntry,
+      worstDay: worstDayEntry
+    };
+  };
 
   return (
     <>
@@ -405,8 +507,8 @@ export default function Dashboard() {
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#A09ABC' }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 12, fill: '#A09ABC' }} domain={[0, 'dataMax+1']} axisLine={false} tickLine={false} allowDecimals={false} />
-                    <Tooltip contentStyle={{ background: '#fff', borderRadius: 8, border: 'none', boxShadow: '0 2px 8px #A09ABC22' }} labelStyle={{ color: '#6C63A6' }} />
+                    <YAxis tick={{ fontSize: 12, fill: '#A09ABC' }} domain={[1, 5]} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <Tooltip content={<CustomTooltip />} labelStyle={{ color: '#6C63A6' }} />
                     <Legend verticalAlign="top" height={24} iconType="circle" wrapperStyle={{ color: '#A09ABC', fontWeight: 600, fontSize: 15 }} />
                     <Area type="monotone" dataKey="entries" stroke="#6C3483" fill="url(#darkPurple)" strokeWidth={3} dot={{ r: 4, fill: '#6C3483' }} activeDot={{ r: 7, fill: '#6C3483' }} name="entries" />
                     <Area type="monotone" dataKey="moods" stroke="#8B7BB9" fill="url(#lightPurple)" strokeWidth={3} dot={{ r: 4, fill: '#8B7BB9' }} activeDot={{ r: 7, fill: '#8B7BB9' }} name="moods" />
@@ -552,6 +654,92 @@ export default function Dashboard() {
                 Save
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Mood Consistency Report Modal */}
+      {showTrendsModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white rounded-2xl p-8 shadow-lg max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4 text-[#A09ABC]">Mood Consistency Report</h2>
+            {(() => {
+              const stats = getMoodStats();
+              if (!stats) return <div>No mood data for this month.</div>;
+              const avgNum = stats.avg;
+              const modalBestDay = stats.bestDay;
+              const modalWorstDay = stats.worstDay;
+              const modalMostCommon = stats.mostCommon;
+
+              // Daily and weekly stats
+              const todayStr = new Date().toISOString().split('T')[0];
+              const weekAgo = new Date();
+              weekAgo.setDate(weekAgo.getDate() - 6);
+              const weekStr = weekAgo.toISOString().split('T')[0];
+              // Filter moods for today and this week
+              const dailyMoods = Object.entries(monthlyMoods).filter(([date]) => date === todayStr);
+              const weeklyMoods = Object.entries(monthlyMoods).filter(([date]) => date >= weekStr && date <= todayStr);
+              const dailyMoodScore = dailyMoods.length > 0 ? moodScoreMap[dailyMoods[0][1]] : null;
+              const weeklyMoodScores = weeklyMoods.map(([_, emoji]) => moodScoreMap[emoji]);
+              const weeklyAvgMood = weeklyMoodScores.length > 0 ? (weeklyMoodScores.reduce((a, b) => a + b, 0) / weeklyMoodScores.length).toFixed(2) : null;
+              const weeklyMostCommon = (() => {
+                if (weeklyMoods.length === 0) return null;
+                const freq: Record<string, number> = {};
+                weeklyMoods.forEach(([_, emoji]) => { freq[emoji] = (freq[emoji] || 0) + 1; });
+                return Object.keys(freq).reduce((a, b) => freq[a] > freq[b] ? a : b);
+              })();
+              return (
+                <>
+                  <div className="mb-4 text-[#6C63A6] text-base">
+                    Here’s a summary of your mood patterns for <b>{today.toLocaleString('default', { month: 'long', year: 'numeric' })}</b>:
+                  </div>
+                  {/* Daily Report */}
+                  <div className="mb-4 p-3 rounded-lg bg-[#F3F0F9]">
+                    <div className="font-semibold text-[#A09ABC] mb-1">Today’s Report</div>
+                    <div>Average Mood: <b>{dailyMoodScore ? dailyMoodScore + ' (' + Object.entries(moodLabelMap).find(([k]) => moodScoreMap[k] === dailyMoodScore)?.[1] + ')' : 'No mood logged'}</b></div>
+                    <div>Entries: <b>{dailyMoods.length}</b></div>
+                  </div>
+                  {/* Weekly Report */}
+                  <div className="mb-4 p-3 rounded-lg bg-[#F3F0F9]">
+                    <div className="font-semibold text-[#A09ABC] mb-1">This Week’s Report</div>
+                    <div>Average Mood: <b>{weeklyAvgMood ? weeklyAvgMood + ' (' + (weeklyMostCommon ? moodLabelMap[weeklyMostCommon as keyof typeof moodLabelMap] : '') + ')' : 'No moods logged'}</b></div>
+                    <div>Most Common Mood: <b>{weeklyMostCommon ? moodLabelMap[weeklyMostCommon as keyof typeof moodLabelMap] + ' ' + weeklyMostCommon : 'N/A'}</b></div>
+                    <div>Entries: <b>{weeklyMoods.length}</b></div>
+                  </div>
+                  {/* Monthly Report */}
+                  <div className="mb-2">
+                    <span className="font-semibold text-[#A09ABC]">Average Mood Score:</span>
+                    <span className="ml-2">{stats.avg} <span className="text-xs text-[#6C63A6]">(1 = lowest, 5 = happiest)</span></span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="font-semibold text-[#A09ABC]">Most Frequent Mood:</span>
+                    <span className="ml-2">{moodLabelMap[modalMostCommon as keyof typeof moodLabelMap]} {modalMostCommon}</span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="font-semibold text-[#A09ABC]">Best Day:</span>
+                    <span className="ml-2">{modalBestDay[0]} — {moodLabelMap[modalBestDay[1] as keyof typeof moodLabelMap]} {modalBestDay[1]}</span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="font-semibold text-[#A09ABC]">Toughest Day:</span>
+                    <span className="ml-2">{modalWorstDay[0]} — {moodLabelMap[modalWorstDay[1] as keyof typeof moodLabelMap]} {modalWorstDay[1]}</span>
+                  </div>
+                  <div className="mt-6 text-[#6C63A6] text-base font-semibold">
+                    {avgNum >= 4 ? (
+                      <>You’ve been in a <span className="text-[#A09ABC] font-bold">great mood</span> this month! Keep it up and continue spreading positivity. 🎉</>
+                    ) : avgNum >= 3 ? (
+                      <>Your mood has been <span className="text-[#A09ABC] font-bold">balanced</span>. Remember to take time for yourself and celebrate small wins. 😊</>
+                    ) : (
+                      <>It’s been a <span className="text-[#A09ABC] font-bold">challenging month</span>. Remember, it’s okay to have ups and downs. Take care of yourself and reach out if you need support. 💜</>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
+            <button
+              className="mt-8 bg-[#A09ABC] text-white px-5 py-2 rounded-lg font-bold shadow hover:bg-[#B6A6CA] transition"
+              onClick={() => setShowTrendsModal(false)}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

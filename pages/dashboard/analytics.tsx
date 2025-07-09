@@ -24,6 +24,35 @@ export default function Analytics() {
   const router = useRouter();
   const { darkMode } = useDarkMode();
 
+  // Add mood label and score maps (copy from dashboard)
+  const moodLabelMap: { [key: string]: string } = {
+    "😁": "Very Happy",
+    "🙂": "Happy",
+    "��": "Neutral",
+    "😔": "Sad",
+    "😢": "Crying",
+    "😡": "Angry",
+    "😴": "Sleepy",
+    "😍": "In Love",
+    "😇": "Blessed",
+    "😂": "Laughing",
+    "😅": "Relieved",
+    "😉": "Winking",
+    "😜": "Playful",
+    "🥳": "Celebrating",
+    "😎": "Cool",
+    "🥺": "Pleading",
+    "😭": "Sobbing",
+    "😘": "Kissing",
+    "😳": "Embarrassed"
+  };
+  const moodScoreMap: { [key: string]: number } = {
+    "😁": 5, "🙂": 4, "😐": 3, "😔": 2, "😢": 1,
+    "😡": 1, "😴": 2, "😍": 5, "😇": 5, "😂": 5,
+    "😅": 4, "😉": 4, "😜": 4, "🥳": 5, "😎": 5,
+    "🥺": 2, "😭": 1, "😘": 5, "😳": 3
+  };
+
   // Generate random stars for dark mode decoration
   const generateStars = () => {
     const stars = [];
@@ -42,6 +71,9 @@ export default function Analytics() {
   };
   const [stars] = useState(generateStars());
 
+  // After fetching moods, fetch mood details for reports
+  const [moodDetails, setMoodDetails] = useState<{ date: string; emoji: string }[]>([]);
+
   useEffect(() => {
     async function fetchData() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -49,17 +81,22 @@ export default function Analytics() {
         router.push("/auth/login");
         return;
       }
-      // Fetch moods
+      // Fetch moods (with emoji)
       const { data: moods } = await supabase
+        .from("moods")
+        .select("created_at, emoji")
+        .eq("user_id", session.user.id);
+      setMoodDetails((moods || []).map(m => ({ date: m.created_at.split('T')[0], emoji: m.emoji })));
+      // Fetch moods
+      const { data: moodsGrouped } = await supabase
         .from("moods")
         .select("created_at")
         .eq("user_id", session.user.id);
-      const moodGrouped = moods?.reduce((acc, entry) => {
+      const moodChart = Object.entries(moodsGrouped?.reduce((acc, entry) => {
         const date = new Date(entry.created_at).toLocaleDateString();
         acc[date] = (acc[date] || 0) + 1;
         return acc;
-      }, {} as Record<string, number>);
-      const moodChart = Object.entries(moodGrouped || {}).map(([date, moods]) => ({ date, moods }));
+      }, {} as Record<string, number>) || {}).map(([date, moods]) => ({ date, moods }));
       setMoodData(moodChart);
       // Fetch journal entries
       const { data: journals } = await supabase
@@ -88,6 +125,25 @@ export default function Analytics() {
     moods: moodData.find(d => d.date === date)?.moods || 0,
     entries: journalData.find(d => d.date === date)?.entries || 0
   }));
+
+  // Helper to get mood stats for a date range
+  function getMoodStatsForRange(moods: { date: string; emoji: string }[], start: Date, end: Date) {
+    const filtered = moods.filter(m => {
+      const d = new Date(m.date);
+      return d >= start && d <= end;
+    });
+    if (filtered.length === 0) return null;
+    const scores = filtered.map(m => moodScoreMap[m.emoji] ?? 3);
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const freq: Record<string, number> = {};
+    filtered.forEach(m => { freq[m.emoji] = (freq[m.emoji] || 0) + 1; });
+    const mostCommon = Object.keys(freq).reduce((a, b) => freq[a] > freq[b] ? a : b);
+    return {
+      avg,
+      mostCommon,
+      count: filtered.length
+    };
+  }
 
   if (loading) {
     return (
@@ -182,6 +238,94 @@ export default function Analytics() {
                     </AreaChart>
                   </ResponsiveContainer>
                 )}
+              </div>
+              <div className={`mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4`}>
+                {/* Today */}
+                {(() => {
+                  const today = new Date();
+                  const todayStr = today.toISOString().split('T')[0];
+                  const daily = getMoodStatsForRange(moodDetails, today, today);
+                  return (
+                    <div className="p-5 rounded-xl bg-[#F3F0F9] shadow flex flex-col h-full border-2 border-[#A09ABC]/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl">📅</span>
+                        <span className="font-bold text-lg text-[#A09ABC]">Today</span>
+                      </div>
+                      <div className="mt-2 text-xl font-bold text-[#A09ABC]">{daily ? daily.avg.toFixed(2) : 'N/A'} <span className="text-base font-normal">{daily ? '(' + (moodLabelMap[daily.mostCommon] || daily.mostCommon) + ')' : ''}</span></div>
+                      <div className="mb-1 text-[#6C63A6]">Avg Mood</div>
+                      <div className="text-lg font-semibold">{daily ? (moodLabelMap[daily.mostCommon] + ' ' + daily.mostCommon) : 'N/A'}</div>
+                      <div className="mb-1 text-[#6C63A6]">Most Common Mood</div>
+                      <div className="text-lg font-semibold">{daily ? daily.count : 0}</div>
+                      <div className="text-[#6C63A6]">Entries</div>
+                    </div>
+                  );
+                })()}
+                {/* This Week */}
+                {(() => {
+                  const today = new Date();
+                  const weekAgo = new Date();
+                  weekAgo.setDate(today.getDate() - 6);
+                  const weekly = getMoodStatsForRange(moodDetails, weekAgo, today);
+                  return (
+                    <div className="p-5 rounded-xl bg-[#F3F0F9] shadow flex flex-col h-full border-2 border-[#A09ABC]/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl">📈</span>
+                        <span className="font-bold text-lg text-[#A09ABC]">This Week</span>
+                      </div>
+                      <div className="mt-2 text-xl font-bold text-[#A09ABC]">{weekly ? weekly.avg.toFixed(2) : 'N/A'} <span className="text-base font-normal">{weekly ? '(' + (moodLabelMap[weekly.mostCommon] || weekly.mostCommon) + ')' : ''}</span></div>
+                      <div className="mb-1 text-[#6C63A6]">Avg Mood</div>
+                      <div className="text-lg font-semibold">{weekly ? (moodLabelMap[weekly.mostCommon] + ' ' + weekly.mostCommon) : 'N/A'}</div>
+                      <div className="mb-1 text-[#6C63A6]">Most Common Mood</div>
+                      <div className="text-lg font-semibold">{weekly ? weekly.count : 0}</div>
+                      <div className="text-[#6C63A6]">Entries</div>
+                    </div>
+                  );
+                })()}
+                {/* This Month */}
+                {(() => {
+                  const today = new Date();
+                  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                  const monthly = getMoodStatsForRange(moodDetails, startOfMonth, today);
+                  return (
+                    <div className="p-5 rounded-xl bg-[#F3F0F9] shadow flex flex-col h-full border-2 border-[#A09ABC]/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl">🗓️</span>
+                        <span className="font-bold text-lg text-[#A09ABC]">This Month</span>
+                      </div>
+                      <div className="mt-2 text-xl font-bold text-[#A09ABC]">{monthly ? monthly.avg.toFixed(2) : 'N/A'} <span className="text-base font-normal">{monthly ? '(' + (moodLabelMap[monthly.mostCommon] || monthly.mostCommon) + ')' : ''}</span></div>
+                      <div className="mb-1 text-[#6C63A6]">Avg Mood</div>
+                      <div className="text-lg font-semibold">{monthly ? (moodLabelMap[monthly.mostCommon] + ' ' + monthly.mostCommon) : 'N/A'}</div>
+                      <div className="mb-1 text-[#6C63A6]">Most Common Mood</div>
+                      <div className="text-lg font-semibold">{monthly ? monthly.count : 0}</div>
+                      <div className="text-[#6C63A6]">Entries</div>
+                    </div>
+                  );
+                })()}
+                {/* Overall */}
+                {(() => {
+                  const overall = getMoodStatsForRange(moodDetails, new Date('2000-01-01'), new Date());
+                  let message = '';
+                  if (overall) {
+                    if (overall.avg >= 4) message = "You're doing great! Keep up the positive vibes! 🎉";
+                    else if (overall.avg >= 3) message = "Your mood is balanced. Remember to take care of yourself! 😊";
+                    else message = "It's okay to have tough days. Take care and reach out if you need support. 💜";
+                  }
+                  return (
+                    <div className="p-5 rounded-xl bg-[#E1D8E9] shadow flex flex-col h-full border-2 border-[#A09ABC]">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl">🌟</span>
+                        <span className="font-bold text-lg text-[#A09ABC]">Overall</span>
+                      </div>
+                      <div className="mt-2 text-xl font-bold text-[#A09ABC]">{overall ? overall.avg.toFixed(2) : 'N/A'} <span className="text-base font-normal">{overall ? '(' + (moodLabelMap[overall.mostCommon] || overall.mostCommon) + ')' : ''}</span></div>
+                      <div className="mb-1 text-[#6C63A6]">Avg Mood</div>
+                      <div className="text-lg font-semibold">{overall ? (moodLabelMap[overall.mostCommon] + ' ' + overall.mostCommon) : 'N/A'}</div>
+                      <div className="mb-1 text-[#6C63A6]">Most Common Mood</div>
+                      <div className="text-lg font-semibold">{overall ? overall.count : 0}</div>
+                      <div className="text-[#6C63A6]">Entries</div>
+                      <div className="mt-3 text-[#A09ABC] text-base font-bold">{message}</div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>

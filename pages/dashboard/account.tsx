@@ -49,7 +49,6 @@ const [socialLinks, setSocialLinks] = useState({
 const [showDeleteModal, setShowDeleteModal] = useState(false);
 const router = useRouter();
 const profileUserId = router.query.id as string | undefined; // The user whose profile is being viewed
-const [friendsList, setFriendsList] = useState<{ id: string, full_name: string, avatar_url: string }[]>([]);
 const [showNotification, setShowNotification] = useState(false);
 const [notificationType, setNotificationType] = useState<'success' | 'error' | null>(null);
 const [notificationMsg, setNotificationMsg] = useState('');
@@ -117,30 +116,7 @@ setJournalEntries(journals || []);
 fetchProfile();
 }, []);
 
-// Fetch friends list for the profile being viewed
-useEffect(() => {
-  async function fetchFriendsList() {
-    const targetId = profileUserId || userId;
-    if (!targetId) return;
-    // Get all friend IDs where user is targetId
-    const { data: friendLinks } = await supabase
-      .from('friends')
-      .select('friend_id')
-      .eq('user_id', targetId);
-    if (!friendLinks || friendLinks.length === 0) {
-      setFriendsList([]);
-      return;
-    }
-    const friendIds = friendLinks.map(f => f.friend_id);
-    // Fetch profile info for all friends
-    const { data: friendProfiles } = await supabase
-      .from('profiles')
-      .select('id, full_name, avatar_url')
-      .in('id', friendIds);
-    setFriendsList(friendProfiles || []);
-  }
-  fetchFriendsList();
-}, [profileUserId, userId]);
+// Remove friendsList state, fetchFriendsList useEffect, and Friends List section from the render block
 
 async function handleProfileSave() {
 if (!userId) return;
@@ -418,28 +394,6 @@ return (
         </div>
       </div>
     )}
-    {/* Friends List Section */}
-    <div className="w-full flex flex-col items-center mb-8">
-      <div className={`text-lg font-bold mb-4 ${darkMode ? 'text-[#A09ABC]' : 'text-gray-700'}`}>Friends</div>
-      {friendsList.length === 0 ? (
-        <div className="text-center text-sm opacity-60">No friends yet.</div>
-      ) : (
-        <div className="flex flex-wrap gap-4 justify-center">
-          {friendsList.map(friend => (
-            <div key={friend.id} className="flex flex-col items-center w-20">
-              <Image
-                src={friend.avatar_url || '/default-avatar.png'}
-                alt={friend.full_name || 'Friend'}
-                width={48}
-                height={48}
-                className="rounded-full shadow"
-              />
-              <div className="text-xs text-center mt-1 truncate w-full" title={friend.full_name}>{friend.full_name || 'No Name'}</div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
     {/* Delete Account Section */}
     <div className="w-full flex flex-col items-center border-t border-gray-300 pt-6 mt-2">
       <button
